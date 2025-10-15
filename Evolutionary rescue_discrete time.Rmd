@@ -41,21 +41,26 @@ In this notebook, we are implementing simulations of evolutionary rescue by a si
 ## Simulate one generation of population size change
 We want to observe the numbers of wild-type and mutant individuals over time. As first step, we simulate one generation of the population. At time $t$, the population has $N_a$ wild-type individuals and $N_A$ mutant individuals. First, these reproduce. This is modeled by drawing a Poisson random variable according to the expected absolute number $N_a \cdot (1-r)$ of wild-type individuals, where $r$ is the decay rate of the wild type, and $N_A \cdot (1-r+s)$ of mutant individuals, where $s$ is the selective advantage of the mutant over the wild time. Then mutation from $a$ to $A$ occurs as a Poisson random variable according to the given mutation rate. This defines the composition of the population at time $t+1$.
 ```{r}
-simulate_one_gen <- function(N_a, N_A, decay_rate, sel_coeff, mut_rate) {
+simulate_one_gen <- function(N_wm, N_sm, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm) {
   # draw offspring according to Poisson distribution
-  offsp_a <- rpois(1, N_a * (1-decay_rate))
-  offsp_A <- rpois(1, N_A * (1-decay_rate+sel_coeff))
+  offsp_wd <- rpois(1, N_wm * (1-decay_rate_wm-s_wm))
+  offsp_wb <- rpois(1, N_wm * (1-decay_rate_wm+s_wm))
+  offsp_sd <- rpois(1, N_sm * (1-decay_rate_sm-s_sm))
+  offsp_sb <- rpois(1, N_sm * (1-decay_rate_sm+s_sm))
   # draw new mutants according to Poisson distribution
-  mut_a_to_A <- rpois(1, offsp_a * mut_rate)
+  mut_wd_to_wb <- rpois(1, offsp_wd * m_rate_wm)
+  mut_sd_to_sb <- rpois(1, offsp_sd * m_rate_sm)
   
   # determine new population sizes of wild type and mutant
-  N_a_new <- max(offsp_a - mut_a_to_A, 0)
-  N_A_new <-  offsp_A + mut_a_to_A
+  N_wd_new <- max(offsp_wd - mut_wd_to_wb, 0)
+  N_wb_new <-  offsp_wb + mut_wd_to_wb
+  N_sd_new <- max(offsp_sd - mut_sd_to_sb, 0)
+  N_sb_new <-  offsp_sb + mut_sd_to_sb
   
-  return(c(N_a_new, N_A_new))
+ return(c(N_wd_new, N_wb_new, N_sd_new, N_sb_new))
 }
 # Test the function
-print(simulate_one_gen(100,0,0.1,0.2,0.01))
+print(simulate_one_gen(50,50,0.1,0.2,0.2,0.4,0.5,0.5))
 ``` 
 
 ### Questions
