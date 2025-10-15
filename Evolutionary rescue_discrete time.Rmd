@@ -125,9 +125,14 @@ As you can see if you simulate and plot the output several times, there is a lot
 
 ```{r}
 # set some parameters to fixed values
-init_a <- 100
-init_A <- 0
-m_rate <- 0.001
+init_wm <- 100
+init_sm <- 0
+m_rate_wm <- 0.001
+m_rate_sm <- 0.001
+decay_rate_wm <- 0.1
+decay_rate_sm <- 0.6
+s_wm <- 0.2
+s_sm <- 0.8
 max_gen <- 1000
 # determine how often to run the simulation for each set of parameters
 no_replicates <- 100
