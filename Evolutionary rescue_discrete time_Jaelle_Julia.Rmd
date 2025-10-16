@@ -7,21 +7,6 @@ output:
     df_print: paged
 ---
 
-This notebook is meant to introduce you to simulations and calculations using R. In the following, we will simulate the evolutionary rescue model introduced in the lecture.
-
-## Your tasks
-
-Read through the code and execute it (using the "play" or "run" or "knit/preview" buttons - you might have to install some extra packages for the latter). Then "tackle" the following questions:
-
--   Do you understand what each line means? Which lines are (particularly) confusing?
--   Check out the questions following each code block and try to answer them.
-
-## Troubleshooting
-
-1.  If it all looks very confusing right now and you cannot answer any of the questions, do not despair! We will go through everything step by step during the practical and you will soon become familiar with such code. Note that we do **not** expect you to be able to answer all these questions today!
-2.  If you cannot execute the code at all, tell us as soon as you can, so we can try to fix this together. Everyone should be able to run the code on their computer - it's not sufficient to peak onto your neighbor's screen.
-3.  A great tool to understand what a line of code does is to print the output line by line, using the `print()` command. Be aware that in long loops this can create quite a mess of output.
-
 ------------------------------------------------------------------------
 
 ## Simulating evolutionary rescue in discrete time
@@ -80,13 +65,6 @@ simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_s
 print(simulate_one_gen(N_wd=50, N_wb=0, N_sd=50, N_sb=0, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.2, s_sm=0.4, m_rate_wm=0.1, m_rate_sm=0.1))
 ```
 
-### Questions
-
--   Why do we substract `mut_a_to_A` from `N_a_new` and not from `N_A_new`? a mutates to A, therefore these individuals are lost in a and gained in A
--   In the life cycle as defined above, do individuals reproduce first and then mutate, or vice versa? reproduce and then mutate
--   Running the test output repeatedly, why do you almost always get mutant individuals in the next generation, even though you start without any mutants? Mutation rate is 1 % and its assumed that all 100 individuals reproduce.
--   What does the function `c` do? It puts them together in an object to get returned.
-
 ## Simulate a population trajectory
 
 We can now track the dynamics of the population from one generation to another, but this is not enough. We want to follow the population from time 0 until it either is rescued or goes extinct. This is what the following function does.
@@ -124,7 +102,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
 # set max_gen to a Value to be used througout
 max_gen <- 1000
 # create your Simulation Data
-output <- simulate_pop(init_wd=100, init_wb=0,  init_sd=100, init_sb=0, decay_rate_wm=0.2, decay_rate_sm=0.4, s_wm=0.1, s_sm=0.4, m_rate_wm=0.01, m_rate_sm=0.1,max_gen)
+output <- simulate_pop(init_wd=1000, init_wb=0,  init_sd=1000, init_sb=0, decay_rate_wm=0.2, decay_rate_sm=0.3, s_wm=0.2, s_sm=0.4, m_rate_wm=0.3, m_rate_sm=0.5,max_gen)
 # show the last few Lines of the Data Table
 print(tail(output))
 # plot the Output - note that the Plot Range and the x Axis have to be adjusted based on the Length of the Table
@@ -145,12 +123,6 @@ legend("topleft",
        legend=c("Weak deleterious","Weak beneficial","Strong deleterious","Strong beneficial"),
        col=c("blue","navyblue","red","darkred"), lty=1, lwd=1.5)
 ```
-
-### Questions
-
--   What is the difference between `pop_vector` and `pop_new`? In pop_vector the results are saved and in pop_new is the function applied that simulates one generation. So in pop_new the function is run again and again, therefore the results are changed and overwritten. But they are saved in pop_vector, therefore pop_vector later contains a list of different results
--   What is the condition that breaks the loop good for? What are its disadvantages? So that the loop doesn't run to max. Also you could probably detect errors better and save some time. It could fail to show all results, for example if the population gets rescued but the populations size doesnt exceed 1.5 \* population size before. Could get tables of different lengths =\> more difficult to analyse it together.
--   What does the function `tail` do? It shows the last results of the function. To check that something happened and it does what you expect it to do.
 
 ## A small analysis
 
@@ -184,61 +156,52 @@ m_values_wm <- c(0.01,0.05,0.1)
 m_values_sm <- c(0.05,0.1,0.15)
 
 
-# initialize data table - where to collect the results
+# initialize Data Table - where to collect the Results
 data_table <- c()
-# run the simulation across all chosen parameters
-# loop over mutation rates and selection strength
+# run the Simulation across all chosen parameters
+# loop over mutation rates
 for(mval_wm in m_values_wm){
   for(mval_sm in m_values_sm){
-    # loop over selection coefficients
+    # loop over Selection strength
     for(sval_wm in s_values_wm){
       for(sval_sm in s_values_sm){
-        # different way of running many simulations: make replicates using "repeat" function with a        counter i
-        # reset counter
+        # different Way of running many Simulations: make Replicates using "repeat" Function         with a counter i
+        # reset Counter
         i<-1
         repeat {
-          # increase counter by one
+          # increase Counter by one
           i<-i+1
-          # run the simulation once
+          # run the Simulation once
           one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
                                   decay_rate_wm, decay_rate_sm,
                                   sval_wm, sval_sm, mval_wm, mval_sm, max_gen)
-          # determine total population sizes
+          # determine total Population Sizes
           total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
-          # determine minimum population size
+          # determine final Population Size for each Mutant
           N_end_wd <- one_run[nrow(one_run), "wd"]
           N_end_wb <- one_run[nrow(one_run), "wb"]
           N_end_sd <- one_run[nrow(one_run), "sd"]
           N_end_sb <- one_run[nrow(one_run), "sb"]
           
           total_end <- N_end_wd + N_end_wb + N_end_sd + N_end_sb
-          # determine (first) generation at which this population size occurred
+          # determine Frequencies of each mutant in the final Population
           freq_wd <- ifelse(total_end > 0, N_end_wd / total_end, 0)
           freq_wb <- ifelse(total_end > 0, N_end_wb / total_end, 0)
           freq_sd <- ifelse(total_end > 0, N_end_sd / total_end, 0)
           freq_sb <- ifelse(total_end > 0, N_end_sb / total_end, 0)
-          # enter the data into the table
+          # enter the D into the Table
           data_table <- rbind(data_table,c(mval_wm,mval_sm,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
-          # stop the repeated computation after no_replicates times
+          # stop the repeated Computation after no_replicates times
           if(i>no_replicates) break
         }
       }
     }
   }
 }
-# define column names of data table
+# define Column Names of Data Table
 colnames(data_table) <- c("m_rate_wm","m_rate_sm","s_wm","s_sm","N_end_wd", "N_end_wb", "N_end_sd", "N_end_sb","fred_wd", "freq_wb", "freq_sd","freq_sb")
-# show the first lines of the output
+# show the first and last Lines of the Output
 print(head(data_table))
 print(tail(data_table))
 ```
 
-### Questions
-
--   Why does this code block run much more slowly than the others? Because its 3 loops intertwined together: First the for then again a for function in the previous for function and then the repeat function (and repeats).
--   Why is it useful to define the parameters at the beginning (e.g. `init_a=100`) and use their names rather than the numbers throughout the rest of the code? So that you can change the numbers easily, otherwise you would have to change the number everytime it appears in the code.
--   What does the function `which` do? It only chooses variables (its position) that fulfil a certain condition.
-
-## Next steps
-
-So, where do you go from here? Of course you won't just stare at these tables (at least not forever). Visualization would be a good step to see how the minimum population size varies with the decay rate and the selection coefficient. And you might want to include only the cases in which rescue happens, and also extract the rescue probability in parallel. However, the idea is that you pick a question that you find (more) interesting and implement modified versions of this code to address your question of choice.
