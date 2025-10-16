@@ -60,7 +60,7 @@ simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_s
  return(c(N_wd_new, N_wb_new, N_sd_new, N_sb_new))
 }
 # Test the function
-print(simulate_one_gen(N_wd=50, N_wb=0, N_sd=50, N_sb=0, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.2, s_sm=0.4, m_rate_wm=0.001, m_rate_sm=0.001))
+print(simulate_one_gen(N_wd=50, N_wb=0, N_sd=50, N_sb=0, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.1, m_rate_sm=0.1))
 ``` 
 
 ### Questions
