@@ -45,6 +45,7 @@ We want to observe the numbers of wild-type and mutant individuals over time. As
 
 ```{r}
 simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm) {
+  
   # draw offspring according to Poisson distribution
   offsp_wd <- rpois(1, N_wd * (1-decay_rate_wm-s_wm))
   offsp_wb <- rpois(1, N_wb * (1-decay_rate_wm+s_wm))
@@ -80,18 +81,20 @@ We can now track the dynamics of the population from one generation to another, 
 max_gen=1000
 simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm, max_gen) {
   # Create the vector in which to save the results
-  pop_vector <- c(init_wd,init_wb, init_sd, init_wb)
+  pop_vector <- c(init_wd,init_wb, init_sd, init_sb)
   # initiate the variables
   pop_new <- c(init_wd, init_wb, init_sd, init_sb)
   
   # run the simulation until generation t_max
-  for (i in 1:max_gen+1) {
+  for (i in 1:(max_gen + 1)) {
     # redefine the current population one generation later
     pop_new <- simulate_one_gen(pop_new[1],pop_new[2],pop_new[3],pop_new[4], decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm)
     # add the new population sizes to the output vector
     pop_vector <- rbind(pop_vector,pop_new)
     # condition to stop the simulation before t_max: either the population exceeds 1.5 times the original population size, or it goes extinct
-    if (pop_new[1]+pop_new[2]+pop_new[3]+pop_new[4]>=5*(init_wd+init_wb+ init_sd+init_sb) |                          pop_new[1]+pop_new[2]+pop_new[3]+pop_new[4]==0) break
+    if ((sum(pop_new) >= 10 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
+      break
+
 }
   
   # define the row and column names of the output vector
@@ -122,6 +125,10 @@ lines(x_range,output[,2], col="navyblue")
 lines(x_range,output[,3], col="red")
 # add number of sb individuals
 lines(x_range,output[,4], col="darkred")
+# add legend
+legend("topleft",
+       legend=c("Weak deleterious","Weak beneficial","Strong deleterious","Strong beneficial"),
+       col=c("blue","navyblue","red","darkred"), lty=1, lwd=1.5)
 ``` 
 
 ### Questions
@@ -140,52 +147,58 @@ As you can see if you simulate and plot the output several times, there is a lot
 
 ```{r}
 # set some parameters to fixed values
-init_wm <- 100
-init_sm <- 0
+init_wd <- 50
+init_wb <- 0
+init_sd <- 50
+init_sb <- 0
 m_rate_wm <- 0.001
 m_rate_sm <- 0.001
 decay_rate_wm <- 0.1
-decay_rate_sm <- 0.6
+decay_rate_sm <- 0.3
 s_wm <- 0.2
-s_sm <- 0.8
+s_sm <- 0.4
 max_gen <- 1000
 # determine how often to run the simulation for each set of parameters
 no_replicates <- 100
 
 # set parameters to vary
-s_values <- c(0.2,0.3,0.4)
-r_values <- c(0.05,0.1,0.15)
+s_values_wm <- c(0.2,0.3,0.4)
+s_values_sm <- c(0.3,0.4,0.5)
+m_values_wm <- c(0.01,0.05,0.1)
+m_values_sm <- c(0.1,0.15,0.2)
 
 # initialize data table - where to collect the results
 data_table <- c()
 # run the simulation across all chosen parameters
 # loop over decay rates
-for(rval in r_values){
+for(mval in m_values_wm){
   # loop over selection coefficients
-  for(sval in s_values){
-    # different way of running many simulations: make replicates using "repeat" function with a counter i
+  for(sval in s_values_wm){
+    # different way of running many simulations: make replicates using "repeat" function with a        counter i
     # reset counter
     i<-1
     repeat {
       # increase counter by one
       i<-i+1
       # run the simulation once
-      one_run <- simulate_pop(init_a,init_A,rval,sval,m_rate,max_gen)
+      one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
+                        decay_rate_wm, decay_rate_sm,
+                        sval, s_sm, mval, m_rate_sm, max_gen)
       # determine total population sizes
-      total_size <- one_run[,1]+one_run[,2]
+      total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
       # determine minimum population size
       min_size <- min(total_size)
       # determine (first) generation at which this population size occurred
       min_gen <- as.numeric(which(total_size==min_size)[1])
       # enter the data into the table
-      data_table <- rbind(data_table,c(rval,sval,min_gen,min_size)) # note that we add the varying parameters (decay rate and selection coefficient) to the table too
+      data_table <- rbind(data_table,c(mval,sval,min_gen,min_size)) # note that we add the varying       parameters (decay rate and selection coefficient) to the table too
       # stop the repeated computation after no_replicates times
       if(i>no_replicates) break
     }
   }
 }
 # define column names of data table
-colnames(data_table) <- c("r","s","min_gen","no_min")
+colnames(data_table) <- c("m_rate","s","min_gen","no_min")
 # show the first lines of the output
 print(head(data_table))
 ``` 
