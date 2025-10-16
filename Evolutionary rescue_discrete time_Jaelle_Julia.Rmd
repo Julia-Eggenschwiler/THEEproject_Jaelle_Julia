@@ -40,6 +40,9 @@ In this notebook, we are implementing simulations of evolutionary rescue by a si
 
 ## Simulate one generation of population size change
 We want to observe the numbers of wild-type and mutant individuals over time. As first step, we simulate one generation of the population. At time $t$, the population has $N_a$ wild-type individuals and $N_A$ mutant individuals. First, these reproduce. This is modeled by drawing a Poisson random variable according to the expected absolute number $N_a \cdot (1-r)$ of wild-type individuals, where $r$ is the decay rate of the wild type, and $N_A \cdot (1-r+s)$ of mutant individuals, where $s$ is the selective advantage of the mutant over the wild time. Then mutation from $a$ to $A$ occurs as a Poisson random variable according to the given mutation rate. This defines the composition of the population at time $t+1$.
+
+*Question:*	How do 2 deleterious mutations of different strength , which can mutate to beneficial ones, influence the probabilty of rescue and how does their frequency in the population change?
+
 ```{r}
 simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm) {
   # draw offspring according to Poisson distribution
@@ -114,11 +117,11 @@ plot(x_range,output[,1]+output[,2]+output[ ,3]+output[ ,4],type='l',ylim=c(0,max
 # add number of wd individuals
 lines(x_range,output[,1], col="blue")
 # add number of wb individuals
-lines(x_range,output[,2], col="red")
+lines(x_range,output[,2], col="navyblue")
 # add number of sd individuals
-lines(x_range,output[,3], col="green")
+lines(x_range,output[,3], col="red")
 # add number of sb individuals
-lines(x_range,output[,4], col="orange")
+lines(x_range,output[,4], col="darkred")
 ``` 
 
 ### Questions
