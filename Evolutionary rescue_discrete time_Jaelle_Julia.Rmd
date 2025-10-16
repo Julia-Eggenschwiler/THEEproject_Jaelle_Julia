@@ -181,13 +181,13 @@ no_replicates <- 100
 s_values_wm <- c(0.2,0.3,0.4)
 s_values_sm <- c(0.4,0.5,0.6)
 m_values_wm <- c(0.01,0.05,0.1)
-m_values_sm <- c(0.1,0.15,0.2)
+m_values_sm <- c(0.05,0.1,0.15)
 
-# initialize Data Table - where to collect the Results
+
 # initialize data table - where to collect the results
 data_table <- c()
 # run the simulation across all chosen parameters
-# loop over decay rates
+# loop over mutation rates and selection strength
 for(mval_wm in m_values_wm){
   for(mval_sm in m_values_sm){
     # loop over selection coefficients
@@ -218,7 +218,7 @@ for(mval_wm in m_values_wm){
           freq_sd <- ifelse(total_end > 0, N_end_sd / total_end, 0)
           freq_sb <- ifelse(total_end > 0, N_end_sb / total_end, 0)
           # enter the data into the table
-          data_table <- rbind(data_table,c(mval_wm,mval_sm,sval_wm,sval_sm,N_end_wd, N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the varying       parameters (decay rate and selection coefficient) to the table too
+          data_table <- rbind(data_table,c(mval_wm,mval_sm,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
           # stop the repeated computation after no_replicates times
           if(i>no_replicates) break
         }
