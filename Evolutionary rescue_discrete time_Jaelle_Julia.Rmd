@@ -192,14 +192,27 @@ for(mval_wm in m_values_wm){
           # enter the D into the Table
           data_table <- rbind(data_table,c(mval_wm,mval_sm,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
           # stop the repeated Computation after no_replicates times
+          
+          
           if(i>no_replicates) break
+          
         }
       }
     }
   }
 }
+#Mean Frequencies of each mutant
+mean_freq_wd <- mean(freq_wd)*100
+mean_freq_wb <- mean(freq_wb)*100
+mean_freq_sd <- mean(freq_sd)*100
+mean_freq_sb <- mean(freq_sb)*100
+
+print(paste("Mean frequency of wd =", mean_freq_wd) )
+print(paste("Mean frequency of wb =", mean_freq_wb) )
+print(paste("Mean frequency of sd =", mean_freq_sd) )
+print(paste("Mean frequency of sb =", mean_freq_sb) )
 # define Column Names of Data Table
-colnames(data_table) <- c("m_rate_wm","m_rate_sm","s_wm","s_sm","N_end_wd", "N_end_wb", "N_end_sd", "N_end_sb","fred_wd", "freq_wb", "freq_sd","freq_sb")
+colnames(data_table) <- c("m_rate_wm","m_rate_sm","s_wm","s_sm","N_end_wd", "N_end_wb", "N_end_sd", "N_end_sb","freq_wd", "freq_wb", "freq_sd","freq_sb")
 # show the first and last Lines of the Output
 print(head(data_table))
 print(tail(data_table))
