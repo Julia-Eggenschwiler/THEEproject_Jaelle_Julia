@@ -179,7 +179,7 @@ no_replicates <- 100
 
 # set Parameters to vary
 s_values_wm <- c(0.2,0.3,0.4)
-s_values_sm <- c(0.3,0.4,0.5)
+s_values_sm <- c(0.4,0.5,0.6)
 m_values_wm <- c(0.01,0.05,0.1)
 m_values_sm <- c(0.1,0.15,0.2)
 
@@ -227,7 +227,7 @@ print(tail(data_table))
 
 ### Questions
 
--   Why does this code block run much more slowly than the others? Because its 3 loops intertwined together: First the for then again a for function in the previous for function and then the repeat function (and repeats)
+-   Why does this code block run much more slowly than the others? Because its 3 loops intertwined together: First the for then again a for function in the previous for function and then the repeat function (and repeats).
 -   Why is it useful to define the parameters at the beginning (e.g. `init_a=100`) and use their names rather than the numbers throughout the rest of the code? So that you can change the numbers easily, otherwise you would have to change the number everytime it appears in the code.
 -   What does the function `which` do? It only chooses variables (its position) that fulfil a certain condition.
 
