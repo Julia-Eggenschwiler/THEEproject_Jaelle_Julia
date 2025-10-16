@@ -171,34 +171,38 @@ m_values_sm <- c(0.1,0.15,0.2)
 data_table <- c()
 # run the simulation across all chosen parameters
 # loop over decay rates
-for(mval in m_values_wm){
+for(mval_wm in m_values_wm){
+  for(mval_sm in m_values_sm){
   # loop over selection coefficients
-  for(sval in s_values_wm){
+    for(sval_wm in s_values_wm){
+      for(sval_sm in s_values_sm){
     # different way of running many simulations: make replicates using "repeat" function with a        counter i
     # reset counter
-    i<-1
-    repeat {
+      i<-1
+      repeat {
       # increase counter by one
-      i<-i+1
+        i<-i+1
       # run the simulation once
-      one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
+        one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
                         decay_rate_wm, decay_rate_sm,
-                        sval, s_sm, mval, m_rate_sm, max_gen)
+                        sval_wm, sval_sm, mval_wm, mval_sm, max_gen)
       # determine total population sizes
-      total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
+        total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
       # determine minimum population size
-      min_size <- min(total_size)
+        min_size <- min(total_size)
       # determine (first) generation at which this population size occurred
-      min_gen <- as.numeric(which(total_size==min_size)[1])
+        min_gen <- as.numeric(which(total_size==min_size)[1])
       # enter the data into the table
-      data_table <- rbind(data_table,c(mval,sval,min_gen,min_size)) # note that we add the varying       parameters (decay rate and selection coefficient) to the table too
+        data_table <- rbind(data_table,c(mval_wm,mval_sm,sval_wm,sval_sm,min_gen,min_size)) # note that we add the varying       parameters (decay rate and selection coefficient) to the table too
       # stop the repeated computation after no_replicates times
-      if(i>no_replicates) break
+        if(i>no_replicates) break
     }
+  }
+  }
   }
 }
 # define column names of data table
-colnames(data_table) <- c("m_rate","s","min_gen","no_min")
+colnames(data_table) <- c("m_rate_wm","m_rate_sm","s_wm","s_sm","min_gen","no_min")
 # show the first lines of the output
 print(head(data_table))
 ``` 
