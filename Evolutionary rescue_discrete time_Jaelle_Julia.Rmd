@@ -313,6 +313,46 @@ ggplot(data_table_sd, aes(x = factor(V1), y = V2, fill = factor(V1))) +
     title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
   ) +
   theme_minimal()
+
+library(ggplot2)
+
+# Sicherstellen, dass es ein Data Frame ist
+data_table_wd <- as.data.frame(data_table_wd)
+colnames(data_table_wd) <- c("V1", "V2")
+
+library(ggplot2)
+
+# Sicherstellen, dass es ein Data Frame ist
+data_table_wd <- as.data.frame(data_table_wd)
+colnames(data_table_wd) <- c("V1", "V2")
+
+# Scatterplot mit Jitter und Mittelwert
+ggplot(data_table_wd, aes(x = factor(V1), y = V2, color = factor(V1))) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  labs(
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    color = "Selektionskoeffizient",
+    title = "Scatterplot der Frequenzen mit Mittelwerten für verschiedene Selektionskoeffizienten"
+  ) +
+  theme_minimal()
+
+data_table_sb <- as.data.frame(data_table_sb)
+colnames(data_table_sb) <- c("V1", "V2")
+
+# Scatterplot mit Jitter und Mittelwert
+ggplot(data_table_sb, aes(x = factor(V1), y = V2, color = factor(V1))) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  labs(
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    color = "Selektionskoeffizient",
+    title = "Scatterplot der Frequenzen mit Mittelwerten für verschiedene Selektionskoeffizienten"
+  ) +
+  theme_minimal()
+
 # calculating Rescue probability
 rescue_prob <- rescue_count / total_runs
 # Mean Frequencies of each mutant
