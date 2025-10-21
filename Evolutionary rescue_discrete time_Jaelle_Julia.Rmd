@@ -71,7 +71,7 @@ We can now track the dynamics of the population from one generation to another, 
 
 ```{r}
 # Simulation runs until the 100th Generation
-max_gen=1000
+max_gen=100
 simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm, max_gen) {
   # Create the Vector in which to save the Results
   pop_vector <- c(init_wd,init_wb, init_sd, init_sb)
@@ -85,7 +85,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
     # add the new Population Sizes to the Output Vector
     pop_vector <- rbind(pop_vector,pop_new)
     # Condition to stop the Simulation before max_gen: either the Population exceeds 1.5         Times the Original Population Size, or it goes extinct
-    if ((sum(pop_new) >= 10 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
+    if ((sum(pop_new) >= 4000 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
       break
 
 }
@@ -100,9 +100,9 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
 
 # Test the Function and plot the Result
 # set max_gen to a Value to be used througout
-max_gen <- 1000
+max_gen <- 100
 # create your Simulation Data
-output <- simulate_pop(init_wd=1000, init_wb=0,  init_sd=1000, init_sb=0, decay_rate_wm=0.2, decay_rate_sm=0.3, s_wm=0.2, s_sm=0.4, m_rate_wm=0.3, m_rate_sm=0.5,max_gen)
+output <- simulate_pop(init_wd=8, init_wb=0,  init_sd=8, init_sb=0, decay_rate_wm=0.3, decay_rate_sm=0.4, s_wm=0.2, s_sm=0.4, m_rate_wm=0.3, m_rate_sm=0.3,max_gen)
 # show the last few Lines of the Data Table
 print(tail(output))
 # plot the Output - note that the Plot Range and the x Axis have to be adjusted based on the Length of the Table
@@ -147,7 +147,8 @@ s_wm <- 0.2
 s_sm <- 0.4
 max_gen <- 1000
 # determine how often to run the Simulation for each set of Parameters
-no_replicates <- 100
+no_replicates <- 10
+
 
 # set Parameters to vary
 s_values_wm <- c(0.2,0.3,0.4)
@@ -158,10 +159,14 @@ m_values_sm <- c(0.05,0.1,0.15)
 
 # initialize Data Table - where to collect the Results
 data_table <- c()
+data_table_wd<- c()
+data_table_wb<- c()
+data_table_sd<- c()
+data_table_sb<- c()
 # run the Simulation across all chosen parameters
 # loop over mutation rates
-for(mval_wm in m_values_wm){
-  for(mval_sm in m_values_sm){
+#for(mval_wm in m_values_wm){
+ # for(mval_sm in m_values_sm){
     # loop over Selection strength
     for(sval_wm in s_values_wm){
       for(sval_sm in s_values_sm){
@@ -174,9 +179,12 @@ for(mval_wm in m_values_wm){
           # run the Simulation once
           one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
                                   decay_rate_wm, decay_rate_sm,
-                                  sval_wm, sval_sm, mval_wm, mval_sm, max_gen)
+                                  sval_wm, sval_sm, m_rate_wm=0.2,m_rate_sm=0.2, max_gen)
+          
           # determine total Population Sizes
           total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
+          
+          
           # determine final Population Size for each Mutant
           N_end_wd <- one_run[nrow(one_run), "wd"]
           N_end_wb <- one_run[nrow(one_run), "wb"]
@@ -189,6 +197,13 @@ for(mval_wm in m_values_wm){
           freq_wb <- ifelse(total_end > 0, N_end_wb / total_end, 0)
           freq_sd <- ifelse(total_end > 0, N_end_sd / total_end, 0)
           freq_sb <- ifelse(total_end > 0, N_end_sb / total_end, 0)
+          
+          
+          
+          data_table_wd<- rbind(data_table_wd, c(sval_wm,freq_wd))
+          data_table_wb<- rbind(data_table_wb, c(sval_wm, freq_wb))
+          data_table_sd<- rbind(data_table_sd,c(sval_sm, freq_sd))
+          data_talbe_sb<-rbind(data_table_sb, c (sval_sm,freq_sb))
           # enter the D into the Table
           data_table <- rbind(data_table,c(mval_wm,mval_sm,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
           # stop the repeated Computation after no_replicates times
@@ -199,8 +214,8 @@ for(mval_wm in m_values_wm){
         }
       }
     }
-  }
-}
+  #}
+#}
 #Mean Frequencies of each mutant
 mean_freq_wd <- mean(freq_wd)*100
 mean_freq_wb <- mean(freq_wb)*100
