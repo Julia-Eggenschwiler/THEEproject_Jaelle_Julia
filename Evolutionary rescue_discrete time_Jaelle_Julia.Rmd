@@ -223,6 +223,94 @@ data_table_sb<- c()
     }
   #}
 #}
+# Make sure your data is a proper data frame
+data_table_wd <- as.data.frame(data_table_wd)
+
+# If the column names are missing or wrong, set them
+colnames(data_table_wd) <- c("V1", "V2")
+
+# Add an index column for plotting along x-axis
+data_table_wd$Index <- 1:nrow(data_table_wd)
+
+# Now use ggplot2
+library(ggplot2)
+
+ggplot(data_table_wd, aes(x = Index, y = V2, color = factor(V1))) +
+  geom_line() +
+  geom_point(size = 1) +
+  labs(
+    x = "Index / Generation",
+    y = "Frequency (V2)",
+    color = "Selection Coefficient (V1)",
+    title = "Frequency vs Index for Different Selection Coefficients"
+  ) +
+  theme_minimal()
+
+library(ggplot2)
+
+# Sicherstellen, dass es ein Data Frame ist
+data_table_wd <- as.data.frame(data_table_wd)
+colnames(data_table_wd) <- c("V1", "V2")
+
+# Boxplot erstellen
+ggplot(data_table_wd, aes(x = factor(V1), y = V2, fill = factor(V1))) +
+  geom_boxplot() +
+  labs(
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    fill = "Selektionskoeffizient",
+    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
+  ) +
+  theme_minimal()
+
+library(ggplot2)
+
+# Sicherstellen, dass es ein Data Frame ist
+data_table_sb <- as.data.frame(data_table_sb)
+colnames(data_table_sb) <- c("V1", "V2")
+
+# Boxplot erstellen
+ggplot(data_table_sb, aes(x = factor(V1), y = V2, fill = factor(V1))) +
+  geom_boxplot() +
+  labs(
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    fill = "Selektionskoeffizient",
+    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
+  ) +
+  theme_minimal()
+library(ggplot2)
+
+# Sicherstellen, dass es ein Data Frame ist
+data_table_wb <- as.data.frame(data_table_wb)
+colnames(data_table_wb) <- c("V1", "V2")
+
+# Boxplot erstellen
+ggplot(data_table_wb, aes(x = factor(V1), y = V2, fill = factor(V1))) +
+  geom_boxplot() +
+  labs(
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    fill = "Selektionskoeffizient",
+    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
+  ) +
+  theme_minimal()
+library(ggplot2)
+
+# Sicherstellen, dass es ein Data Frame ist
+data_table_sd <- as.data.frame(data_table_sd)
+colnames(data_table_sd) <- c("V1", "V2")
+
+# Boxplot erstellen
+ggplot(data_table_sd, aes(x = factor(V1), y = V2, fill = factor(V1))) +
+  geom_boxplot() +
+  labs(
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    fill = "Selektionskoeffizient",
+    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
+  ) +
+  theme_minimal()
 # calculating Rescue probability
 rescue_prob <- rescue_count / total_runs
 # Mean Frequencies of each mutant
