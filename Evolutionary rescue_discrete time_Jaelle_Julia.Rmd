@@ -102,7 +102,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
 # set max_gen to a Value to be used througout
 max_gen <- 100
 # create your Simulation Data
-output <- simulate_pop(init_wd=500, init_wb=500,  init_sd=500, init_sb=500, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.2, s_sm=0.3, m_rate_wm=0.01, m_rate_sm=0.04,max_gen)
+output <- simulate_pop(init_wd=300, init_wb=300,  init_sd=300, init_sb=300, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.02, m_rate_sm=0.02,max_gen)
 # show the last few Lines of the Data Table
 print(tail(output))
 # plot the Output - note that the Plot Range and the x Axis have to be adjusted based on the Length of the Table
@@ -163,6 +163,9 @@ data_table_wd<- c()
 data_table_wb<- c()
 data_table_sd<- c()
 data_table_sb<- c()
+# define total runs and rescue count
+total_runs<-0
+rescue_count<-0
 # run the Simulation across all chosen parameters
 # loop over mutation rates
 #for(mval_wm in m_values_wm){
@@ -172,9 +175,8 @@ data_table_sb<- c()
       for(sval_sm in s_values_sm){
         # different Way of running many Simulations: make Replicates using "repeat" Function         with a counter i
         # reset Counter
-        i<-0
-        total_runs<-0
-        rescue_count<-0
+        i<-1
+        
         repeat {
           # increase Counter by one
           i<-i+1
@@ -183,7 +185,7 @@ data_table_sb<- c()
           # run the Simulation once
           one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
                                   decay_rate_wm, decay_rate_sm,
-                                  sval_wm, sval_sm, m_rate_wm=0.2,m_rate_sm=0.2, max_gen)
+                                  sval_wm, sval_sm, m_rate_wm=0.02,m_rate_sm=0.02, max_gen)
           
           # determine total Population Sizes
           total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
@@ -210,9 +212,9 @@ data_table_sb<- c()
           data_table_wd<- rbind(data_table_wd, c(sval_wm,freq_wd))
           data_table_wb<- rbind(data_table_wb, c(sval_wm, freq_wb))
           data_table_sd<- rbind(data_table_sd,c(sval_sm, freq_sd))
-          data_talbe_sb<-rbind(data_table_sb, c (sval_sm,freq_sb))
+          data_table_sb<-rbind(data_table_sb, c (sval_sm,freq_sb))
           # enter the D into the Table
-          data_table <- rbind(data_table,c(mval_wm,mval_sm,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
+          data_table <- rbind(data_table,c(m_rate_wm = 0.02,m_rate_sm = 0.02,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
           # stop the repeated Computation after no_replicates times
           
           
@@ -235,11 +237,12 @@ print(paste("Mean frequency of wd =", mean_freq_wd) )
 print(paste("Mean frequency of wb =", mean_freq_wb) )
 print(paste("Mean frequency of sd =", mean_freq_sd) )
 print(paste("Mean frequency of sb =", mean_freq_sb) )
+print(paste("The rescue probability is =",rescue_prob))
 # define Column Names of Data Table
 colnames(data_table) <- c("m_rate_wm","m_rate_sm","s_wm","s_sm","N_end_wd", "N_end_wb", "N_end_sd", "N_end_sb","freq_wd", "freq_wb", "freq_sd","freq_sb")
 # show the first and last Lines of the Output
 print(head(data_table))
 print(tail(data_table))
-print(rescue_prob)
+
 ```
 
