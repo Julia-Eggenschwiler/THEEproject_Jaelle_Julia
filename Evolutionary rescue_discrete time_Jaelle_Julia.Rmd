@@ -85,7 +85,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
     # add the new Population Sizes to the Output Vector
     pop_vector <- rbind(pop_vector,pop_new)
     # Condition to stop the Simulation before max_gen: either the Population exceeds 1.5         Times the Original Population Size, or it goes extinct
-    if ((sum(pop_new) >= 4000 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
+    if ((sum(pop_new) >= 10 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
       break
 
 }
