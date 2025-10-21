@@ -54,10 +54,10 @@ simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_s
   mut_sb_to_sd <- rpois(1, offsp_sb * m_rate_sm)
   
   # determine new Population Sizes of all four Mutants (2 versions of weak Mutations   and 2   versions of strong Mutations)
-  N_wd_new <- offsp_wd - mut_wd_to_wb+ mut_wb_to_wd
-  N_wb_new <-offsp_wb - mut_wb_to_wd+ mut_wd_to_wb
-  N_sd_new <- offsp_sd - mut_sd_to_sb+ mut_sb_to_sd
-  N_sb_new <-offsp_sb - mut_sb_to_sd+ mut_sd_to_sb
+  N_wd_new <- max(offsp_wd - mut_wd_to_wb+ mut_wb_to_wd,0)
+  N_wb_new <- max(offsp_wb - mut_wb_to_wd+ mut_wd_to_wb,0)
+  N_sd_new <- max(offsp_sd - mut_sd_to_sb+ mut_sb_to_sd,0)
+  N_sb_new <- max(offsp_sb - mut_sb_to_sd+ mut_sd_to_sb,0)
   
  return(c(N_wd_new, N_wb_new, N_sd_new, N_sb_new))
 }
@@ -102,7 +102,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
 # set max_gen to a Value to be used througout
 max_gen <- 100
 # create your Simulation Data
-output <- simulate_pop(init_wd=8, init_wb=0,  init_sd=8, init_sb=0, decay_rate_wm=0.3, decay_rate_sm=0.4, s_wm=0.2, s_sm=0.4, m_rate_wm=0.3, m_rate_sm=0.3,max_gen)
+output <- simulate_pop(init_wd=500, init_wb=500,  init_sd=500, init_sb=500, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.2, s_sm=0.3, m_rate_wm=0.01, m_rate_sm=0.04,max_gen)
 # show the last few Lines of the Data Table
 print(tail(output))
 # plot the Output - note that the Plot Range and the x Axis have to be adjusted based on the Length of the Table
@@ -135,14 +135,14 @@ As you can see if you simulate and plot the output several times, there is a lot
 
 ```{r}
 # set some Parameters to fixed Values
-init_wd <- 50
-init_wb <- 0
-init_sd <- 50
-init_sb <- 0
-m_rate_wm <- 0.001
-m_rate_sm <- 0.001
+init_wd <- 300
+init_wb <- 300
+init_sd <- 300
+init_sb <- 300
+m_rate_wm <- 0.01
+m_rate_sm <- 0.05
 decay_rate_wm <- 0.1
-decay_rate_sm <- 0.3
+decay_rate_sm <- 0.2
 s_wm <- 0.2
 s_sm <- 0.4
 max_gen <- 1000
@@ -151,9 +151,9 @@ no_replicates <- 10
 
 
 # set Parameters to vary
-s_values_wm <- c(0.2,0.3,0.4)
-s_values_sm <- c(0.4,0.5,0.6)
-m_values_wm <- c(0.01,0.05,0.1)
+s_values_wm <- c(0.05,0.1,0.15)
+s_values_sm <- c(0.2,0.25,0.3)
+m_values_wm <- c(0.001,0.01,0.05)
 m_values_sm <- c(0.05,0.1,0.15)
 
 
@@ -172,10 +172,14 @@ data_table_sb<- c()
       for(sval_sm in s_values_sm){
         # different Way of running many Simulations: make Replicates using "repeat" Function         with a counter i
         # reset Counter
-        i<-1
+        i<-0
+        total_runs<-0
+        rescue_count<-0
         repeat {
           # increase Counter by one
           i<-i+1
+          # defining total runs
+          total_runs <- total_runs + 1
           # run the Simulation once
           one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
                                   decay_rate_wm, decay_rate_sm,
@@ -192,6 +196,9 @@ data_table_sb<- c()
           N_end_sb <- one_run[nrow(one_run), "sb"]
           
           total_end <- N_end_wd + N_end_wb + N_end_sd + N_end_sb
+          if (total_end > 0) {
+            rescue_count <- rescue_count + 1
+          }
           # determine Frequencies of each mutant in the final Population
           freq_wd <- ifelse(total_end > 0, N_end_wd / total_end, 0)
           freq_wb <- ifelse(total_end > 0, N_end_wb / total_end, 0)
@@ -216,7 +223,9 @@ data_table_sb<- c()
     }
   #}
 #}
-#Mean Frequencies of each mutant
+# calculating Rescue probability
+rescue_prob <- rescue_count / total_runs
+# Mean Frequencies of each mutant
 mean_freq_wd <- mean(freq_wd)*100
 mean_freq_wb <- mean(freq_wb)*100
 mean_freq_sd <- mean(freq_sd)*100
@@ -231,5 +240,6 @@ colnames(data_table) <- c("m_rate_wm","m_rate_sm","s_wm","s_sm","N_end_wd", "N_e
 # show the first and last Lines of the Output
 print(head(data_table))
 print(tail(data_table))
+print(rescue_prob)
 ```
 
