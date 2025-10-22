@@ -151,10 +151,10 @@ no_replicates <- 10
 
 
 # set Parameters to vary
-s_values_wm <- c(0.05,0.1,0.15)
-s_values_sm <- c(0.2,0.25,0.3)
-m_values_wm <- c(0.001,0.01,0.05)
-m_values_sm <- c(0.05,0.1,0.15)
+s_values_wm <- c(0.10,0.15,0.2)
+s_values_sm <- c(0.2,0.205,0.210)
+#m_values_wm <- c(0.001,0.01,0.05)
+#m_values_sm <- c(0.05,0.1,0.15)
 
 
 # initialize Data Table - where to collect the Results
@@ -267,90 +267,6 @@ ggplot(rescue_summary, aes(x = factor(s_wm), y = factor(s_sm), fill = rescue_pro
     fill = "Rescue probability"
   ) +
   theme_minimal()
-
-
-
-
-# Now use ggplot2
-library(ggplot2)
-
-ggplot(data_table_wd, aes(x = Index, y = V2, color = factor(V1))) +
-  geom_line() +
-  geom_point(size = 1) +
-  labs(
-    x = "Index / Generation",
-    y = "Frequency (V2)",
-    color = "Selection Coefficient (V1)",
-    title = "Frequency vs Index for Different Selection Coefficients"
-  ) +
-  theme_minimal()
-
-library(ggplot2)
-
-# Sicherstellen, dass es ein Data Frame ist
-data_table_wd <- as.data.frame(data_table_wd)
-colnames(data_table_wd) <- c("V1", "V2")
-
-# Boxplot erstellen
-ggplot(data_table_wd, aes(x = factor(V1), y = V2, fill = factor(V1))) +
-  geom_boxplot() +
-  labs(
-    x = "Selektionskoeffizient (V1)",
-    y = "Frequenz (V2)",
-    fill = "Selektionskoeffizient",
-    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
-  ) +
-  theme_minimal()
-
-library(ggplot2)
-
-# Sicherstellen, dass es ein Data Frame ist
-data_table_sb <- as.data.frame(data_table_sb)
-colnames(data_table_sb) <- c("V1", "V2")
-
-# Boxplot erstellen
-ggplot(data_table_sb, aes(x = factor(V1), y = V2, fill = factor(V1))) +
-  geom_boxplot() +
-  labs(
-    x = "Selektionskoeffizient (V1)",
-    y = "Frequenz (V2)",
-    fill = "Selektionskoeffizient",
-    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
-  ) +
-  theme_minimal()
-library(ggplot2)
-
-# Sicherstellen, dass es ein Data Frame ist
-data_table_wb <- as.data.frame(data_table_wb)
-colnames(data_table_wb) <- c("V1", "V2")
-
-# Boxplot erstellen
-ggplot(data_table_wb, aes(x = factor(V1), y = V2, fill = factor(V1))) +
-  geom_boxplot() +
-  labs(
-    x = "Selektionskoeffizient (V1)",
-    y = "Frequenz (V2)",
-    fill = "Selektionskoeffizient",
-    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
-  ) +
-  theme_minimal()
-library(ggplot2)
-
-# Sicherstellen, dass es ein Data Frame ist
-data_table_sd <- as.data.frame(data_table_sd)
-colnames(data_table_sd) <- c("V1", "V2")
-
-# Boxplot erstellen
-ggplot(data_table_sd, aes(x = factor(V1), y = V2, fill = factor(V1))) +
-  geom_boxplot() +
-  labs(
-    x = "Selektionskoeffizient (V1)",
-    y = "Frequenz (V2)",
-    fill = "Selektionskoeffizient",
-    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
-  ) +
-  theme_minimal()
-
 library(ggplot2)
 
 # Sicherstellen, dass es ein Data Frame ist
@@ -368,10 +284,10 @@ ggplot(data_table_wd, aes(x = factor(V1), y = V2, color = factor(V1))) +
   geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
   labs(
-    x = "Selektionskoeffizient (V1)",
-    y = "Frequenz (V2)",
-    color = "Selektionskoeffizient",
-    title = "Scatterplot der Frequenzen mit Mittelwerten für verschiedene Selektionskoeffizienten"
+    x = "selection coefficients",
+    y = "frequency",
+    color = "selection coefficient",
+    title = "Weak deletrious-Means of frequencies of the different selection coefficients"
   ) +
   theme_minimal()
 
@@ -383,12 +299,47 @@ ggplot(data_table_sb, aes(x = factor(V1), y = V2, color = factor(V1))) +
   geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
   labs(
-    x = "Selektionskoeffizient (V1)",
-    y = "Frequenz (V2)",
-    color = "Selektionskoeffizient",
-    title = "Scatterplot der Frequenzen mit Mittelwerten für verschiedene Selektionskoeffizienten"
+    x = "selection coefficients",
+    y = "frequency",
+    color = "selection coefficients",
+    title = "Strong beneficial-Means of frequencies of the different selection coefficients"
   ) +
   theme_minimal()
+
+data_table_sd <- as.data.frame(data_table_sd)
+
+colnames(data_table_sd) <- c("V1", "V2")
+
+# Scatterplot mit Jitter und Mittelwert
+ggplot(data_table_sd, aes(x = factor(V1), y = V2, color = factor(V1))) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  labs(
+    x = "selection coefficients ",
+    y = "frequency",
+    color = "selection coefficients",
+    title = "Strong deletrious-Means of frequencies of the different selection coefficients"
+  ) +
+  theme_minimal()
+data_table_wb <- as.data.frame(data_table_wb)
+colnames(data_table_sb) <- c("V1", "V2")
+
+# Scatterplot mit Jitter und Mittelwert
+ggplot(data_table_wb, aes(x = factor(V1), y = V2, color = factor(V1))) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  labs(
+    x = "selecton coefficients",
+    y = "frequency",
+    color = "selection coefficients",
+    title = "Weak beneficial-Means of frequencies of the different selection coefficientsn"
+  ) +
+  theme_minimal()
+# calculating Resc
+
+
+
+
 
 # calculating Rescue probability
 rescue_prob <- rescue_count / total_runs
