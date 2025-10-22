@@ -15,14 +15,35 @@ In this notebook, we are implementing simulations of evolutionary rescue by a si
 
 ## List of variables and parameters
 
--   $N_a$ current size of the wild-type (a) population (changes over time)
--   $N_A$ current size of the mutant (A) population (changes over time)
--   `init_wm` initial population size of wild-type population (should be a positive integer)
--   `init_wm` initial population size of the mutant population (should be a non-negative integer)
--   `decay_rate` detrimental effect of the environment on the wild type (i.e., the wild-type population decays at this rate; should be \>0 to induce potential extinction)
--   `sel_coeff` selective advantage of the mutant over the wild type (should be \>decay_rate to allow for evolutionary rescue)
--   `mut_rate` mutation rate from the wild type to the mutant genotype (should be \>0 and small)
--   `t_max` number of generations after which to stop the simulation (should be an integer \>0; this is not a model parameter but a setting for the simulations). In the code presented here, the simulation stops automatically if the population goes extinct, or if it recovers and exceeds 1.5 times the original total population size, so `t_max` can be set to a large value without creating extremely long simulation times.
+-   **N_end_wd:** size of the mutant (wd) population
+
+-   **N_end_wb:** size of the mutant (wb) population
+
+-   **N_end_sd:** size of the mutant (sd) population
+
+-   **N_end_sb:** size of the mutant (sb) population
+
+-   **init_wd:** initial population size of population with the weak deleterious mutation (should be a positive integer)
+
+-   **init_wb:** initial population size of the population with the weak beneficial mutation (should be a non-negative
+
+-   **init_sd:** initial population size of the population with the strong deleterious mutation (should be a positive integer)
+
+-   **init_sb:** initial population size of the population with the strong beneficial mutation (should be a non-negative integer)
+
+-   **decay_rate_wm:** detrimental effect of the environment on the weak mutation (i.e., the populations carrying weak mutations decays at this rate; should be \>0 to induce potential extinction)
+
+-   **decay_rate_sm:** detrimental effect of the environment on the strong mutation (i.e., the populations carrying strong mutations decays at this rate; should be \>0 to induce potential extinction)
+
+-   **s_wm:** selective strength of the weak mutation (should be \>decay_rate to allow for evolutionary rescue)
+
+-   **s_sm:** selective strength of the strong mutation (should be \>decay_rate to allow for evolutionary rescue)
+
+-   **m_rate_wm:** mutation rate from the weak deletrious to the weak beneficial deleterious mutation and from weak beneficial to weak deleterious mutation (should be \>0 and small)
+
+    **m_rate_sm:** mutation rate from the strong deleterious to the strong beneficial mutation and from strong beneficial to strong deleterious mutation (should be \>0 and small)
+
+-   **max_gen:** number of generations after which to stop the simulation (should be an integer \>0; this is not a model parameter but a setting for the simulations). In the code presented here, the simulation stops automatically if the population goes extinct, or if it recovers and exceeds 10 times the original total population size, so **max_gen** can be set to a large value without creating extremely long simulation times.
 
 ## Simulate one generation of population size change
 
@@ -33,10 +54,11 @@ We want to observe the numbers of wild-type and mutant individuals over time. As
 How do 2 deleterious mutations of different strength , which can mutate to beneficial ones, influence the probabilty of rescue and how does their frequency in the population change?
 
 ## Definitions
-- wd: weak deleterious
-- wb: weak beneficial
-- sd: strong deleterious
-- sb: strong beneficial
+
+-   wd: weak deleterious
+-   wb: weak beneficial
+-   sd: strong deleterious
+-   sb: strong beneficial
 
 ```{r}
 # Function for simulating one Generation in the Population
@@ -424,4 +446,3 @@ print(head(data_table))
 print(tail(data_table))
 
 ```
-
