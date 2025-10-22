@@ -19,6 +19,7 @@ In this notebook, we are implementing simulations of evolutionary rescue by a si
 
 -   **N_end_wb:** size of the mutant (wb) population
 
+-   **N_end_sd:** size of the mutant (sd) population
 
 -   **N_end_sb:** size of the mutant (sb) population
 
