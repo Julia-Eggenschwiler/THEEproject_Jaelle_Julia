@@ -203,14 +203,14 @@ As you can see if you simulate and plot the output several times, there is a lot
 
 ```{r}
 # set some Parameters to fixed Values
-init_wd <- 300
-init_wb <- 0
-init_sd <- 300
-init_sb <- 0
+init_wd <- 30
+init_wb <- 25
+init_sd <- 30
+init_sb <- 25
 m_rate_wm <- 0.01
 m_rate_sm <- 0.05
-decay_rate_wm <- 0.2
-decay_rate_sm <- 0.3
+decay_rate_wm <- 0.1
+decay_rate_sm <- 0.2
 s_wm <- 0.2
 s_sm <- 0.4
 max_gen <- 1000
@@ -260,7 +260,7 @@ rescue_count<-0
           # run the Simulation once
           one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
                                   decay_rate_wm, decay_rate_sm,
-                                  sval_wm, sval_sm, m_rate_wm=0.001,m_rate_sm=0.001, max_gen)
+                                  sval_wm, sval_sm, m_rate_wm=0.01,m_rate_sm=0.01, max_gen)
           
           # determine total Population Sizes
           total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
@@ -306,7 +306,7 @@ rescue_count<-0
           data_table_sd<- rbind(data_table_sd,c(sval_sm, freq_sd))
           data_table_sb<-rbind(data_table_sb, c (sval_sm,freq_sb))
           # enter the D into the Table
-          data_table <- rbind(data_table,c(m_rate_wm = 0.001,m_rate_sm = 0.001,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
+          data_table <- rbind(data_table,c(m_rate_wm = 0.01,m_rate_sm = 0.01,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
           # stop the repeated Computation after no_replicates times
           
           
@@ -329,8 +329,9 @@ data_table_wd$Index <- 1:nrow(data_table_wd)
 # calculate rescue probability per parametercombination
 library(dplyr)
 library(ggplot2)
+library(tidyr)
 
-library(dplyr)
+
 
 rescue_summary <- rescue_results %>%
   group_by(s_wm, s_sm) %>%
@@ -345,8 +346,7 @@ rescue_summary <- rescue_results %>%
 print(rescue_summary)
 
 
-library(tidyr)
-
+# Daten vorbereiten
 rescue_long <- rescue_summary %>%
   pivot_longer(
     cols = starts_with("rescue_prob_"),
@@ -355,50 +355,63 @@ rescue_long <- rescue_summary %>%
   ) %>%
   mutate(
     mutant = gsub("rescue_prob_", "", mutant),
-    # Definiere, welche s-Achse für welchen Mutant gilt:
     s_value = case_when(
       mutant %in% c("wd", "wb") ~ s_wm,
       mutant %in% c("sd", "sb") ~ s_sm
     )
   )
 
-# optional: Mutantennamen schöner machen
-rescue_long$mutant <- gsub("rescue_prob_", "", rescue_long$mutant)
+library(ggplot2)
 
-ggplot(rescue_long, aes(x = s_value, y = rescue_prob, color = mutant, group = mutant)) +
-  geom_point(size = 2) +
+ggplot(rescue_long, aes(x = factor(s_value), y = rescue_prob, fill = mutant)) +
+  geom_boxplot(alpha = 0.7) +
   scale_y_continuous(limits = c(0, 1)) +
-  scale_color_manual(values = c(
-    "wd" = "#0072B2",  # blau
-    "wb" = "#56B4E9",  # hellblau
-    "sd" = "#E69F00",  # orange
-    "sb" = "#D55E00"   # rot
+  scale_fill_manual(values = c(
+    "wd" = "#0072B2", 
+    "wb" = "#56B4E9", 
+    "sd" = "#E69F00", 
+    "sb" = "#D55E00"
   )) +
+  facet_wrap(~ mutant, scales = "free_x") +
   labs(
-    title = "Rescue Probability per Mutant Type",
+    title = "Rescue Probability per Mutant vs Relevant Selection Coefficient (Boxplot)",
     x = "Relevant selection coefficient (s)",
     y = "Rescue Probability",
-    color = "Mutant Type"
+    fill = "Mutant"
+  ) +
+  theme_minimal(base_size = 14)
+
+ggplot(rescue_long, aes(x = s_value, y = rescue_prob, color = mutant)) +
+  geom_jitter(width = 0.01, height = 0, size = 3, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  scale_y_continuous(limits = c(0, 1)) +
+  scale_color_manual(values = c(
+    "wd" = "#0072B2", 
+    "wb" = "#56B4E9", 
+    "sd" = "#E69F00", 
+    "sb" = "#D55E00"
+  )) +
+  facet_wrap(~ mutant, scales = "free_x") +
+  labs(
+    title = "Rescue Probability per Mutant vs Relevant Selection Coefficient (Scatterplot)",
+    x = "Relevant selection coefficient (s)",
+    y = "Rescue Probability",
+    color = "Mutant"
   ) +
   theme_minimal(base_size = 14)
 
 
+0# optional: Mutantennamen schöner machen
+rescue_long$mutant <- gsub("rescue_prob_", "", rescue_long$mutant)
 
 
 
 
 
-# plotting rescue probability and s values with a heatmap
-ggplot(rescue_summary, aes(x = factor(s_wm), y = factor(s_sm), fill = rescue_prob)) +
-  geom_tile(color = "white") +
-  scale_fill_gradient(low = "white", high = "steelblue", limits = c(0,1)) +
-  labs(
-    title = "Rescue Probability across parameter combinations",
-    x = "s_wm (Selection coefficient, weak mutation)",
-    y = "s_sm (Selection coefficient, strong mutation)",
-    fill = "Rescue probability"
-  ) +
-  theme_minimal()
+
+
+
+
 
 
 # plotting wd with different s values
@@ -443,7 +456,7 @@ data_table_sd <- as.data.frame(data_table_sd)
 
 colnames(data_table_sd) <- c("V1", "V2")
 
-# Scatterplot of sd with jitter and mean
+  # Scatterplot of sd with jitter and mean
 ggplot(data_table_sd, aes(x = factor(V1), y = V2, color = factor(V1))) +
   geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
