@@ -15,21 +15,34 @@ In this notebook, we are implementing simulations of evolutionary rescue by a si
 
 ## List of variables and parameters
 
--   $N__end_wd$ size of the mutant (wd) population
--   $N__end_wb$ size of the mutant (wb) population
--   $N__end_sd$ size of the mutant (sd) population
--   $N__end_sb$ size of the mutant (sb) population
--   `init_wd` initial population size of population with the weak deleterious mutation (should be a positive integer)
--   `init_wb` initial population size of the population with the weak beneficial mutation (should be a non-negative integer)
--   `init_sd` initial population size of the population with the strong deleterious mutation (should be a positive integer)
--   `init_sb` initial population size of the population with the strong beneficial mutation (should be a non-negative integer)
--   `decay_rate_wm` detrimental effect of the environment on the weak mutation (i.e., the populations carrying weak mutations decays at this rate; should be \>0 to induce potential extinction)
--   `decay_rate_sm`detrimental effect of the environment on the strong mutation (i.e., the populations carrying strong mutations decays at this rate; should be \>0 to induce potential extinction)
--   `s_wm`selective strength of the weak mutation (should be \>decay_rate to allow for evolutionary rescue)
--   `s_wm`selective strength of the strong mutation (should be \>decay_rate to allow for evolutionary rescue)
--   `m_rate_wm` mutation rate from the weak deletrious to the weak beneficial deleterious mutation and from weak beneficial to weak deleterious mutation (should be \>0 and small)
--   `m_rate_sm`mutation rate from the strong deleterious to the strong beneficial mutation and from strong beneficial to strong deleterious mutation (should be \>0 and small)
--   `max_gen` number of generations after which to stop the simulation (should be an integer \>0; this is not a model parameter but a setting for the simulations). In the code presented here, the simulation stops automatically if the population goes extinct, or if it recovers and exceeds 10 times the original total population size, so `max_gen` can be set to a large value without creating extremely long simulation times.
+-   **N_end_wd:** size of the mutant (wd) population
+
+-   **N_end_wb:** size of the mutant (wb) population
+
+
+-   **N_end_sb:** size of the mutant (sb) population
+
+-   **init_wd:** initial population size of population with the weak deleterious mutation (should be a positive integer)
+
+-   **init_wb:** initial population size of the population with the weak beneficial mutation (should be a non-negative
+
+-   **init_sd:** initial population size of the population with the strong deleterious mutation (should be a positive integer)
+
+-   **init_sb:** initial population size of the population with the strong beneficial mutation (should be a non-negative integer)
+
+-   **decay_rate_wm:** detrimental effect of the environment on the weak mutation (i.e., the populations carrying weak mutations decays at this rate; should be \>0 to induce potential extinction)
+
+-   **decay_rate_sm:** detrimental effect of the environment on the strong mutation (i.e., the populations carrying strong mutations decays at this rate; should be \>0 to induce potential extinction)
+
+-   **s_wm:** selective strength of the weak mutation (should be \>decay_rate to allow for evolutionary rescue)
+
+-   **s_sm:** selective strength of the strong mutation (should be \>decay_rate to allow for evolutionary rescue)
+
+-   **m_rate_wm:** mutation rate from the weak deletrious to the weak beneficial deleterious mutation and from weak beneficial to weak deleterious mutation (should be \>0 and small)
+
+    **m_rate_sm:** mutation rate from the strong deleterious to the strong beneficial mutation and from strong beneficial to strong deleterious mutation (should be \>0 and small)
+
+-   **max_gen:** number of generations after which to stop the simulation (should be an integer \>0; this is not a model parameter but a setting for the simulations). In the code presented here, the simulation stops automatically if the population goes extinct, or if it recovers and exceeds 10 times the original total population size, so **max_gen** can be set to a large value without creating extremely long simulation times.
 
 ## Simulate one generation of population size change
 
