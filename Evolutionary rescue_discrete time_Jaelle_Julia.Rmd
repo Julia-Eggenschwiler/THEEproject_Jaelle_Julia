@@ -102,7 +102,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
 # set max_gen to a Value to be used througout
 max_gen <- 100
 # create your Simulation Data
-output <- simulate_pop(init_wd=300, init_wb=300,  init_sd=300, init_sb=300, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.02, m_rate_sm=0.02,max_gen)
+output <- simulate_pop(init_wd=300, init_wb=300,  init_sd=300, init_sb=300, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.0005, m_rate_sm=0.0005,max_gen)
 # show the last few Lines of the Data Table
 print(tail(output))
 # plot the Output - note that the Plot Range and the x Axis have to be adjusted based on the Length of the Table
@@ -139,8 +139,8 @@ init_wd <- 300
 init_wb <- 300
 init_sd <- 300
 init_sb <- 300
-m_rate_wm <- 0.001
-m_rate_sm <- 0.001
+m_rate_wm <- 0.01
+m_rate_sm <- 0.05
 decay_rate_wm <- 0.1
 decay_rate_sm <- 0.2
 s_wm <- 0.2
@@ -151,10 +151,10 @@ no_replicates <- 10
 
 
 # set Parameters to vary
-s_values_wm <- c(0.10,0.15,0.2)
-s_values_sm <- c(0.2,0.205,0.210)
-#m_values_wm <- c(0.001,0.01,0.05)
-#m_values_sm <- c(0.05,0.1,0.15)
+s_values_wm <- c(0.05,0.1,0.15)
+s_values_sm <- c(0.2,0.25,0.3)
+m_values_wm <- c(0.001,0.01,0.05)
+m_values_sm <- c(0.05,0.1,0.15)
 
 
 # initialize Data Table - where to collect the Results
@@ -163,6 +163,13 @@ data_table_wd<- c()
 data_table_wb<- c()
 data_table_sd<- c()
 data_table_sb<- c()
+# empty list to save rescue results
+rescue_results <- data.frame(
+  s_wm = numeric(),
+  s_sm = numeric(),
+  replicate = integer(),
+  rescued = integer()
+)
 # define total runs and rescue count
 total_runs<-0
 rescue_count<-0
@@ -185,7 +192,7 @@ rescue_count<-0
           # run the Simulation once
           one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
                                   decay_rate_wm, decay_rate_sm,
-                                  sval_wm, sval_sm, m_rate_wm=0.001,m_rate_sm=0.001, max_gen)
+                                  sval_wm, sval_sm, m_rate_wm=0.02,m_rate_sm=0.02, max_gen)
           
           # determine total Population Sizes
           total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
@@ -198,9 +205,15 @@ rescue_count<-0
           N_end_sb <- one_run[nrow(one_run), "sb"]
           
           total_end <- N_end_wd + N_end_wb + N_end_sd + N_end_sb
-          if (total_end > 0) {
-            rescue_count <- rescue_count + 1
-          }
+          # introduce rescue count
+          rescued <- ifelse(total_end > 0,1,0)
+          rescued_count <- rescue_count + rescued
+          # save rescue outcome (rescue or extinction)
+          rescue_results <- rbind(rescue_results,
+                                  data.frame(s_wm = sval_wm,
+                                             s_sm = sval_sm,
+                                             replicate = i-1,
+                                             rescued = rescued))
           # determine Frequencies of each mutant in the final Population
           freq_wd <- ifelse(total_end > 0, N_end_wd / total_end, 0)
           freq_wb <- ifelse(total_end > 0, N_end_wb / total_end, 0)
@@ -214,7 +227,7 @@ rescue_count<-0
           data_table_sd<- rbind(data_table_sd,c(sval_sm, freq_sd))
           data_table_sb<-rbind(data_table_sb, c (sval_sm,freq_sb))
           # enter the D into the Table
-          data_table <- rbind(data_table,c(m_rate_wm = 0.001,m_rate_sm = 0.001,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
+          data_table <- rbind(data_table,c(m_rate_wm = 0.02,m_rate_sm = 0.02,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
           # stop the repeated Computation after no_replicates times
           
           
@@ -225,7 +238,118 @@ rescue_count<-0
     }
   #}
 #}
+# Make sure your data is a proper data frame
+data_table_wd <- as.data.frame(data_table_wd)
 
+# If the column names are missing or wrong, set them
+colnames(data_table_wd) <- c("V1", "V2")
+
+# Add an index column for plotting along x-axis
+data_table_wd$Index <- 1:nrow(data_table_wd)
+# calculate rescue probability per parametercombination
+library(dplyr)
+
+rescue_summary <- rescue_results %>%
+  group_by(s_wm, s_sm) %>%
+  summarise(rescue_prob = mean(rescued), .groups = "drop")
+
+
+print(rescue_summary)
+library(ggplot2)
+# plotting rescue probability with a heatmap
+ggplot(rescue_summary, aes(x = factor(s_wm), y = factor(s_sm), fill = rescue_prob)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  labs(
+    title = "Rescue Probability across parameter combinations",
+    x = "s_wm (Selection coefficient, weak mutation)",
+    y = "s_sm (Selection coefficient, strong mutation)",
+    fill = "Rescue probability"
+  ) +
+  theme_minimal()
+
+
+
+
+# Now use ggplot2
+library(ggplot2)
+
+ggplot(data_table_wd, aes(x = Index, y = V2, color = factor(V1))) +
+  geom_line() +
+  geom_point(size = 1) +
+  labs(
+    x = "Index / Generation",
+    y = "Frequency (V2)",
+    color = "Selection Coefficient (V1)",
+    title = "Frequency vs Index for Different Selection Coefficients"
+  ) +
+  theme_minimal()
+
+library(ggplot2)
+
+# Sicherstellen, dass es ein Data Frame ist
+data_table_wd <- as.data.frame(data_table_wd)
+colnames(data_table_wd) <- c("V1", "V2")
+
+# Boxplot erstellen
+ggplot(data_table_wd, aes(x = factor(V1), y = V2, fill = factor(V1))) +
+  geom_boxplot() +
+  labs(
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    fill = "Selektionskoeffizient",
+    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
+  ) +
+  theme_minimal()
+
+library(ggplot2)
+
+# Sicherstellen, dass es ein Data Frame ist
+data_table_sb <- as.data.frame(data_table_sb)
+colnames(data_table_sb) <- c("V1", "V2")
+
+# Boxplot erstellen
+ggplot(data_table_sb, aes(x = factor(V1), y = V2, fill = factor(V1))) +
+  geom_boxplot() +
+  labs(
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    fill = "Selektionskoeffizient",
+    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
+  ) +
+  theme_minimal()
+library(ggplot2)
+
+# Sicherstellen, dass es ein Data Frame ist
+data_table_wb <- as.data.frame(data_table_wb)
+colnames(data_table_wb) <- c("V1", "V2")
+
+# Boxplot erstellen
+ggplot(data_table_wb, aes(x = factor(V1), y = V2, fill = factor(V1))) +
+  geom_boxplot() +
+  labs(
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    fill = "Selektionskoeffizient",
+    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
+  ) +
+  theme_minimal()
+library(ggplot2)
+
+# Sicherstellen, dass es ein Data Frame ist
+data_table_sd <- as.data.frame(data_table_sd)
+colnames(data_table_sd) <- c("V1", "V2")
+
+# Boxplot erstellen
+ggplot(data_table_sd, aes(x = factor(V1), y = V2, fill = factor(V1))) +
+  geom_boxplot() +
+  labs(
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    fill = "Selektionskoeffizient",
+    title = "Verteilung der Frequenzen für verschiedene Selektionskoeffizienten"
+  ) +
+  theme_minimal()
 
 library(ggplot2)
 
@@ -244,10 +368,10 @@ ggplot(data_table_wd, aes(x = factor(V1), y = V2, color = factor(V1))) +
   geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
   labs(
-    x = "selection coefficients",
-    y = "frequency",
-    color = "selection coefficient",
-    title = "Weak deletrious-Means of frequencies of the different selection coefficients"
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    color = "Selektionskoeffizient",
+    title = "Scatterplot der Frequenzen mit Mittelwerten für verschiedene Selektionskoeffizienten"
   ) +
   theme_minimal()
 
@@ -259,42 +383,13 @@ ggplot(data_table_sb, aes(x = factor(V1), y = V2, color = factor(V1))) +
   geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
   labs(
-    x = "selection coefficients",
-    y = "frequency",
-    color = "selection coefficients",
-    title = "Strong beneficial-Means of frequencies of the different selection coefficients"
+    x = "Selektionskoeffizient (V1)",
+    y = "Frequenz (V2)",
+    color = "Selektionskoeffizient",
+    title = "Scatterplot der Frequenzen mit Mittelwerten für verschiedene Selektionskoeffizienten"
   ) +
   theme_minimal()
 
-data_table_sd <- as.data.frame(data_table_sd)
-
-colnames(data_table_sd) <- c("V1", "V2")
-
-# Scatterplot mit Jitter und Mittelwert
-ggplot(data_table_sd, aes(x = factor(V1), y = V2, color = factor(V1))) +
-  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
-  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
-  labs(
-    x = "selection coefficients ",
-    y = "frequency",
-    color = "selection coefficients",
-    title = "Strong deletrious-Means of frequencies of the different selection coefficients"
-  ) +
-  theme_minimal()
-data_table_wb <- as.data.frame(data_table_wb)
-colnames(data_table_sb) <- c("V1", "V2")
-
-# Scatterplot mit Jitter und Mittelwert
-ggplot(data_table_wb, aes(x = factor(V1), y = V2, color = factor(V1))) +
-  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
-  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
-  labs(
-    x = "selecton coefficients",
-    y = "frequency",
-    color = "selection coefficients",
-    title = "Weak beneficial-Means of frequencies of the different selection coefficientsn"
-  ) +
-  theme_minimal()
 # calculating Rescue probability
 rescue_prob <- rescue_count / total_runs
 # Mean Frequencies of each mutant
