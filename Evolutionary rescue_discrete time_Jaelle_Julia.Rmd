@@ -62,28 +62,41 @@ How do 2 deleterious mutations of different strength , which can mutate to benef
 
 ```{r}
 # Function for simulating one Generation in the Population
+# adding the population sizes, decay rates, seleection coefficients and mutation rates
 simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm) {
   
   # draw Offspring according to Poisson Distribution
+  # altered so all four different mutations are considered 
+  # for deleterious mutations the s is calculated minus (negative effect) and for the beneficial muation the s is added (positive effect)
+  
   offsp_wd <- rpois(1, N_wd * (1-decay_rate_wm-s_wm))
   offsp_wb <- rpois(1, N_wb * (1-decay_rate_wm+s_wm))
   offsp_sd <- rpois(1, N_sd * (1-decay_rate_sm-s_sm))
   offsp_sb <- rpois(1, N_sb * (1-decay_rate_sm+s_sm))
+  
   # draw changing Mutants according to Poisson Distribution
+  # alterations considering the for different mutations 
+  
   mut_wd_to_wb <- rpois(1, offsp_wd * m_rate_wm)
   mut_sd_to_sb <- rpois(1, offsp_sd * m_rate_sm)
   mut_wb_to_wd <- rpois(1, offsp_wb * m_rate_wm)
   mut_sb_to_sd <- rpois(1, offsp_sb * m_rate_sm)
   
   # determine new Population Sizes of all four Mutants (2 versions of weak Mutations   and 2   versions of strong Mutations)
+  # to account for back mutations as well (beneficial to deleterious), mutations rates for these cases are added (mut_b_to_d)
+  
   N_wd_new <- max(offsp_wd - mut_wd_to_wb+ mut_wb_to_wd,0)
   N_wb_new <- max(offsp_wb - mut_wb_to_wd+ mut_wd_to_wb,0)
   N_sd_new <- max(offsp_sd - mut_sd_to_sb+ mut_sb_to_sd,0)
   N_sb_new <- max(offsp_sb - mut_sb_to_sd+ mut_sd_to_sb,0)
   
+  # with the return function, the new values for population sizes are stored
+  
  return(c(N_wd_new, N_wb_new, N_sd_new, N_sb_new))
 }
-# Test the Function
+  # with print we visualize the 4 numbers we get for the population sizes, we simulate the population by setting our parameters to certain values 
+
+
 print(simulate_one_gen(N_wd=50, N_wb=0, N_sd=50, N_sb=0, decay_rate_wm=0, decay_rate_sm=0, s_wm=0, s_sm=0, m_rate_wm=0, m_rate_sm=0))
 ```
 
@@ -93,54 +106,87 @@ We can now track the dynamics of the population from one generation to another, 
 
 ```{r}
 # Simulation runs until the 100th Generation
+
 max_gen=100
+
+#With this function we simulate over generations, we put initial population sizes of the four mutations, with the parameter max_gen we determine that our simulation maximally runs until the 100th geneeration
+
 simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm, max_gen) {
+  
   # Create the Vector in which to save the Results
+  
   pop_vector <- c(init_wd,init_wb, init_sd, init_sb)
+  
   # initiate the variables
+  
   pop_new <- c(init_wd, init_wb, init_sd, init_sb)
   
   # run the Simulation until Generation max_gen
+  
   for (i in 1:(max_gen + 1)) {
+    
     # redefine the current Population one Generation later
+    
     pop_new <- simulate_one_gen(pop_new[1],pop_new[2],pop_new[3],pop_new[4], decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm)
+    
     # add the new Population Sizes to the Output Vector
+    
     pop_vector <- rbind(pop_vector,pop_new)
-    # Condition to stop the Simulation before max_gen: either the Population exceeds 1.5         Times the Original Population Size, or it goes extinct
+    
+    # Condition to stop the Simulation before max_gen: either the Population exceeds 10 Times the Original Population Size, or it goes extinct
+    
     if ((sum(pop_new) >= 10 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
       break
 
 }
   
   # Define the Row and Column Names of the Output Vector
-  rownames(pop_vector) <- (0:max_gen)[1:length(pop_vector[,1])] # Note that the Vector has to be cut if the Simulation stopped early
+  rownames(pop_vector) <- (0:max_gen)[1:length(pop_vector[,1])] 
+  
+  # the colom-names in our vectors are according to our mutations (wd, wb, sd, sb)
+  
   colnames(pop_vector) <- c("wd","wb", "sd", "sb")
-  # return the Result
+  
+  # return the vector
+  
   return(pop_vector)	
 }
 
 
 # Test the Function and plot the Result
-# set max_gen to a Value to be used througout
+
 max_gen <- 100
-# create your Simulation Data
+
+# Simulation Data with certain values determined
+
 output <- simulate_pop(init_wd=300, init_wb=300,  init_sd=300, init_sb=300, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.0005, m_rate_sm=0.0005,max_gen)
+
 # show the last few Lines of the Data Table
+
 print(tail(output))
-# plot the Output - note that the Plot Range and the x Axis have to be adjusted based on the Length of the Table
+
+# plot the Output 
 # determine x axis Range 
+
 x_range <- 0:(length(output[,1])-1)
-# this plots the total Population Size
+
+# this plots the total Population Size-black line visible in the plot
+
 plot(x_range,output[,1]+output[,2]+output[ ,3]+output[ ,4],type='l',ylim=c(0,max(output[,1]+output[,2]+output[ ,3]+output[ ,4])),xlab =  "Generation",ylab = "Population size")
+
 # add Number of wd Individuals
 lines(x_range,output[,1], col="blue")
+
 # add Number of wb Individuals
 lines(x_range,output[,2], col="navyblue")
+
 # add Number of sd Individuals
 lines(x_range,output[,3], col="red")
+
 # add Number of sb Individuals
 lines(x_range,output[,4], col="darkred")
-# add Legend
+
+# add Legend in the top-left corner
 legend("topleft",
        legend=c("Weak deleterious","Weak beneficial","Strong deleterious","Strong beneficial"),
        col=c("blue","navyblue","red","darkred"), lty=1, lwd=1.5)
