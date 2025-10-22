@@ -369,7 +369,7 @@ ggplot(data_table_wb, aes(x = factor(V1), y = V2, color = factor(V1))) +
   labs(
     x = "mutation rate",
     y = "frequency",
-    color = "muration rate coefficients",
+    color = "muration rate",
     title = "Weak beneficial-Means of frequencies of the different mutation rates"
   ) +
   theme_minimal()
