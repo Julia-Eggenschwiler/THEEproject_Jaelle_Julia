@@ -136,13 +136,13 @@ As you can see if you simulate and plot the output several times, there is a lot
 ```{r}
 # set some Parameters to fixed Values
 init_wd <- 300
-init_wb <- 300
+init_wb <- 0
 init_sd <- 300
-init_sb <- 300
+init_sb <- 0
 m_rate_wm <- 0.01
 m_rate_sm <- 0.05
-decay_rate_wm <- 0.1
-decay_rate_sm <- 0.2
+decay_rate_wm <- 0.2
+decay_rate_sm <- 0.3
 s_wm <- 0.2
 s_sm <- 0.4
 max_gen <- 1000
@@ -192,7 +192,7 @@ rescue_count<-0
           # run the Simulation once
           one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
                                   decay_rate_wm, decay_rate_sm,
-                                  sval_wm, sval_sm, m_rate_wm=0.02,m_rate_sm=0.02, max_gen)
+                                  sval_wm, sval_sm, m_rate_wm=0.001,m_rate_sm=0.001, max_gen)
           
           # determine total Population Sizes
           total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
@@ -206,14 +206,25 @@ rescue_count<-0
           
           total_end <- N_end_wd + N_end_wb + N_end_sd + N_end_sb
           # introduce rescue count
-          rescued <- ifelse(total_end > 0,1,0)
-          rescued_count <- rescue_count + rescued
+          rescued_wd <- ifelse(one_run[nrow(one_run), "wd"] > 0, 1, 0)
+          rescued_wb <- ifelse(one_run[nrow(one_run), "wb"] > 0, 1, 0)
+          rescued_sd <- ifelse(one_run[nrow(one_run), "sd"] > 0, 1, 0)
+          rescued_sb <- ifelse(one_run[nrow(one_run), "sb"] > 0, 1, 0)
+
+         
           # save rescue outcome (rescue or extinction)
           rescue_results <- rbind(rescue_results,
-                                  data.frame(s_wm = sval_wm,
-                                             s_sm = sval_sm,
-                                             replicate = i-1,
-                                             rescued = rescued))
+            data.frame(
+              s_wm = sval_wm,
+              s_sm = sval_sm,
+              replicate = i - 1,
+              rescued_wd = rescued_wd,
+              rescued_wb = rescued_wb,
+              rescued_sd = rescued_sd,
+              rescued_sb = rescued_sb
+  )
+)
+
           # determine Frequencies of each mutant in the final Population
           freq_wd <- ifelse(total_end > 0, N_end_wd / total_end, 0)
           freq_wb <- ifelse(total_end > 0, N_end_wb / total_end, 0)
@@ -227,7 +238,7 @@ rescue_count<-0
           data_table_sd<- rbind(data_table_sd,c(sval_sm, freq_sd))
           data_table_sb<-rbind(data_table_sb, c (sval_sm,freq_sb))
           # enter the D into the Table
-          data_table <- rbind(data_table,c(m_rate_wm = 0.02,m_rate_sm = 0.02,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
+          data_table <- rbind(data_table,c(m_rate_wm = 0.001,m_rate_sm = 0.001,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
           # stop the repeated Computation after no_replicates times
           
           
@@ -246,20 +257,73 @@ colnames(data_table_wd) <- c("V1", "V2")
 
 # Add an index column for plotting along x-axis
 data_table_wd$Index <- 1:nrow(data_table_wd)
+
 # calculate rescue probability per parametercombination
+library(dplyr)
+library(ggplot2)
+
 library(dplyr)
 
 rescue_summary <- rescue_results %>%
   group_by(s_wm, s_sm) %>%
-  summarise(rescue_prob = mean(rescued), .groups = "drop")
-
+  summarise(
+    rescue_prob_wd = mean(rescued_wd),
+    rescue_prob_wb = mean(rescued_wb),
+    rescue_prob_sd = mean(rescued_sd),
+    rescue_prob_sb = mean(rescued_sb),
+    .groups = "drop"
+  )
 
 print(rescue_summary)
-library(ggplot2)
-# plotting rescue probability with a heatmap
+
+
+library(tidyr)
+
+rescue_long <- rescue_summary %>%
+  pivot_longer(
+    cols = starts_with("rescue_prob_"),
+    names_to = "mutant",
+    values_to = "rescue_prob"
+  ) %>%
+  mutate(
+    mutant = gsub("rescue_prob_", "", mutant),
+    # Definiere, welche s-Achse für welchen Mutant gilt:
+    s_value = case_when(
+      mutant %in% c("wd", "wb") ~ s_wm,
+      mutant %in% c("sd", "sb") ~ s_sm
+    )
+  )
+
+# optional: Mutantennamen schöner machen
+rescue_long$mutant <- gsub("rescue_prob_", "", rescue_long$mutant)
+
+ggplot(rescue_long, aes(x = s_value, y = rescue_prob, color = mutant, group = mutant)) +
+  geom_point(size = 2) +
+  scale_y_continuous(limits = c(0, 1)) +
+  scale_color_manual(values = c(
+    "wd" = "#0072B2",  # blau
+    "wb" = "#56B4E9",  # hellblau
+    "sd" = "#E69F00",  # orange
+    "sb" = "#D55E00"   # rot
+  )) +
+  labs(
+    title = "Rescue Probability per Mutant Type",
+    x = "Relevant selection coefficient (s)",
+    y = "Rescue Probability",
+    color = "Mutant Type"
+  ) +
+  theme_minimal(base_size = 14)
+
+
+
+
+
+
+
+# plotting rescue probability and s values with a heatmap
 ggplot(rescue_summary, aes(x = factor(s_wm), y = factor(s_sm), fill = rescue_prob)) +
   geom_tile(color = "white") +
-  scale_fill_gradient(low = "white", high = "steelblue") +
+  scale_fill_gradient(low = "white", high = "steelblue", limits = c(0,1)) +
   labs(
     title = "Rescue Probability across parameter combinations",
     x = "s_wm (Selection coefficient, weak mutation)",
@@ -267,19 +331,16 @@ ggplot(rescue_summary, aes(x = factor(s_wm), y = factor(s_sm), fill = rescue_pro
     fill = "Rescue probability"
   ) +
   theme_minimal()
-library(ggplot2)
 
-# Sicherstellen, dass es ein Data Frame ist
+
+# plotting wd with different s values
+  # making sure that its a data frame
 data_table_wd <- as.data.frame(data_table_wd)
 colnames(data_table_wd) <- c("V1", "V2")
 
+
+  # Scatterplot of wd with jitter and mean 
 library(ggplot2)
-
-# Sicherstellen, dass es ein Data Frame ist
-data_table_wd <- as.data.frame(data_table_wd)
-colnames(data_table_wd) <- c("V1", "V2")
-
-# Scatterplot mit Jitter und Mittelwert
 ggplot(data_table_wd, aes(x = factor(V1), y = V2, color = factor(V1))) +
   geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
@@ -287,14 +348,52 @@ ggplot(data_table_wd, aes(x = factor(V1), y = V2, color = factor(V1))) +
     x = "selection coefficients",
     y = "frequency",
     color = "selection coefficient",
-    title = "Weak deletrious-Means of frequencies of the different selection coefficients"
+    title = "Weak deleterious-Means of frequencies of the different selection coefficients"
   ) +
   theme_minimal()
+
+# plotting wb with different s values
+  # making sure that its a data frame
+data_table_wb <- as.data.frame(data_table_wb)
+colnames(data_table_sb) <- c("V1", "V2")
+
+# Scatterplot of wb with jitter and mean
+ggplot(data_table_wb, aes(x = factor(V1), y = V2, color = factor(V1))) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  labs(
+    x = "selecton coefficients",
+    y = "frequency",
+    color = "selection coefficients",
+    title = "Weak beneficial-Means of frequencies of the different selection coefficientsn"
+  ) +
+  theme_minimal()
+
+# plotting sd with different s values
+  # making sure that its a data frame
+data_table_sd <- as.data.frame(data_table_sd)
+
+colnames(data_table_sd) <- c("V1", "V2")
+
+# Scatterplot of sd with jitter and mean
+ggplot(data_table_sd, aes(x = factor(V1), y = V2, color = factor(V1))) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  labs(
+    x = "selection coefficients ",
+    y = "frequency",
+    color = "selection coefficients",
+    title = "Strong deletrious-Means of frequencies of the different selection coefficients"
+  ) +
+  theme_minimal()
+
+# plotting sb with different s values
+  # making sure that its a data frame
 
 data_table_sb <- as.data.frame(data_table_sb)
 colnames(data_table_sb) <- c("V1", "V2")
 
-# Scatterplot mit Jitter und Mittelwert
+  # Scatterplot of sb with jitter and mean 
 ggplot(data_table_sb, aes(x = factor(V1), y = V2, color = factor(V1))) +
   geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
@@ -306,44 +405,8 @@ ggplot(data_table_sb, aes(x = factor(V1), y = V2, color = factor(V1))) +
   ) +
   theme_minimal()
 
-data_table_sd <- as.data.frame(data_table_sd)
 
-colnames(data_table_sd) <- c("V1", "V2")
-
-# Scatterplot mit Jitter und Mittelwert
-ggplot(data_table_sd, aes(x = factor(V1), y = V2, color = factor(V1))) +
-  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
-  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
-  labs(
-    x = "selection coefficients ",
-    y = "frequency",
-    color = "selection coefficients",
-    title = "Strong deletrious-Means of frequencies of the different selection coefficients"
-  ) +
-  theme_minimal()
-data_table_wb <- as.data.frame(data_table_wb)
-colnames(data_table_sb) <- c("V1", "V2")
-
-# Scatterplot mit Jitter und Mittelwert
-ggplot(data_table_wb, aes(x = factor(V1), y = V2, color = factor(V1))) +
-  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
-  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
-  labs(
-    x = "selecton coefficients",
-    y = "frequency",
-    color = "selection coefficients",
-    title = "Weak beneficial-Means of frequencies of the different selection coefficientsn"
-  ) +
-  theme_minimal()
-# calculating Resc
-
-
-
-
-
-# calculating Rescue probability
-rescue_prob <- rescue_count / total_runs
-# Mean Frequencies of each mutant
+# mean Frequencies of each mutant
 mean_freq_wd <- mean(freq_wd)*100
 mean_freq_wb <- mean(freq_wb)*100
 mean_freq_sd <- mean(freq_sd)*100
@@ -353,7 +416,7 @@ print(paste("Mean frequency of wd =", mean_freq_wd) )
 print(paste("Mean frequency of wb =", mean_freq_wb) )
 print(paste("Mean frequency of sd =", mean_freq_sd) )
 print(paste("Mean frequency of sb =", mean_freq_sb) )
-print(paste("The rescue probability is =",rescue_prob))
+
 # define Column Names of Data Table
 colnames(data_table) <- c("m_rate_wm","m_rate_sm","s_wm","s_sm","N_end_wd", "N_end_wb", "N_end_sd", "N_end_sb","freq_wd", "freq_wb", "freq_sd","freq_sb")
 # show the first and last Lines of the Output
