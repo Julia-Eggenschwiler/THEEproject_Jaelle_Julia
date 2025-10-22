@@ -1,0 +1,430 @@
+# Function for simulating one Generation in the Population
+# adding the population sizes, decay rates, seleection coefficients and mutation rates
+simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm) {
+  
+  # draw Offspring according to Poisson Distribution
+  # altered so all four different mutations are considered 
+  # for deleterious mutations the s is calculated minus (negative effect) and for the beneficial muation the s is added (positive effect)
+  
+  offsp_wd <- rpois(1, N_wd * (1-decay_rate_wm-s_wm))
+  offsp_wb <- rpois(1, N_wb * (1-decay_rate_wm+s_wm))
+  offsp_sd <- rpois(1, N_sd * (1-decay_rate_sm-s_sm))
+  offsp_sb <- rpois(1, N_sb * (1-decay_rate_sm+s_sm))
+  
+  # draw changing Mutants according to Poisson Distribution
+  # alterations considering the for different mutations 
+  
+  mut_wd_to_wb <- rpois(1, offsp_wd * m_rate_wm)
+  mut_sd_to_sb <- rpois(1, offsp_sd * m_rate_sm)
+  mut_wb_to_wd <- rpois(1, offsp_wb * m_rate_wm)
+  mut_sb_to_sd <- rpois(1, offsp_sb * m_rate_sm)
+  
+  # determine new Population Sizes of all four Mutants (2 versions of weak Mutations   and 2   versions of strong Mutations)
+  # to account for back mutations as well (beneficial to deleterious), mutations rates for these cases are added (mut_b_to_d)
+  
+  N_wd_new <- max(offsp_wd - mut_wd_to_wb+ mut_wb_to_wd,0)
+  N_wb_new <- max(offsp_wb - mut_wb_to_wd+ mut_wd_to_wb,0)
+  N_sd_new <- max(offsp_sd - mut_sd_to_sb+ mut_sb_to_sd,0)
+  N_sb_new <- max(offsp_sb - mut_sb_to_sd+ mut_sd_to_sb,0)
+  
+  # with the return function, the new values for population sizes are stored
+  
+  return(c(N_wd_new, N_wb_new, N_sd_new, N_sb_new))
+}
+# with print we visualize the 4 numbers we get for the population sizes, we simulate the population by setting our parameters to certain values 
+
+
+print(simulate_one_gen(N_wd=50, N_wb=0, N_sd=50, N_sb=0, decay_rate_wm=0, decay_rate_sm=0, s_wm=0, s_sm=0, m_rate_wm=0, m_rate_sm=0))
+
+
+## Simulate a population trajectory
+
+
+
+# Simulation runs until the 100th Generation
+
+max_gen=100
+
+#With this function we simulate over generations, we put initial population sizes of the four mutations, with the parameter max_gen we determine that our simulation maximally runs until the 100th geneeration
+
+simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm, max_gen) {
+  
+  # Create the Vector in which to save the Results
+  
+  pop_vector <- c(init_wd,init_wb, init_sd, init_sb)
+  
+  # initiate the variables
+  
+  pop_new <- c(init_wd, init_wb, init_sd, init_sb)
+  
+  # run the Simulation until Generation max_gen
+  
+  for (i in 1:(max_gen + 1)) {
+    
+    # redefine the current Population one Generation later
+    
+    pop_new <- simulate_one_gen(pop_new[1],pop_new[2],pop_new[3],pop_new[4], decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm)
+    
+    # add the new Population Sizes to the Output Vector
+    
+    pop_vector <- rbind(pop_vector,pop_new)
+    
+    # Condition to stop the Simulation before max_gen: either the Population exceeds 10 Times the Original Population Size, or it goes extinct
+    
+    if ((sum(pop_new) >= 10 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
+      break
+    
+  }
+  
+  # Define the Row and Column Names of the Output Vector
+  rownames(pop_vector) <- (0:max_gen)[1:length(pop_vector[,1])] 
+  
+  # the colom-names in our vectors are according to our mutations (wd, wb, sd, sb)
+  
+  colnames(pop_vector) <- c("wd","wb", "sd", "sb")
+  
+  # return the vector
+  
+  return(pop_vector)	
+}
+
+
+# Test the Function and plot the Result
+
+max_gen <- 100
+
+# Simulation Data with certain values determined
+
+output <- simulate_pop(init_wd=300, init_wb=300,  init_sd=300, init_sb=300, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.0005, m_rate_sm=0.0005,max_gen)
+
+# show the last few Lines of the Data Table
+
+print(tail(output))
+
+# plot the Output 
+# determine x axis Range 
+
+x_range <- 0:(length(output[,1])-1)
+
+# this plots the total Population Size-black line visible in the plot
+
+plot(x_range,output[,1]+output[,2]+output[ ,3]+output[ ,4],type='l',ylim=c(0,max(output[,1]+output[,2]+output[ ,3]+output[ ,4])),xlab =  "Generation",ylab = "Population size")
+
+# add Number of wd Individuals
+lines(x_range,output[,1], col="blue")
+
+# add Number of wb Individuals
+lines(x_range,output[,2], col="navyblue")
+
+# add Number of sd Individuals
+lines(x_range,output[,3], col="red")
+
+# add Number of sb Individuals
+lines(x_range,output[,4], col="darkred")
+
+# add Legend in the top-left corner
+legend("topleft",
+       legend=c("Weak deleterious","Weak beneficial","Strong deleterious","Strong beneficial"),
+       col=c("blue","navyblue","red","darkred"), lty=1, lwd=1.5)
+# set some Parameters to fixed Values
+init_wd <- 300
+init_wb <- 250
+init_sd <- 300
+init_sb <- 250
+m_rate_wm <- 0.01
+m_rate_sm <- 0.05
+decay_rate_wm <- 0.02
+decay_rate_sm <- 0.09
+s_wm <- 0.2
+s_sm <- 0.4
+max_gen <- 1000
+# determine how often to run the Simulation for each set of Parameters
+no_replicates <- 10
+
+
+# set Parameters to vary
+#s_values_wm <- c(0.10,0.15,0.2)
+#s_values_sm <- c(0.2,0.205,0.210)
+m_values_wm <- c(0.0005,0.0010,0.0015)
+m_values_sm <- c(0.0020,0.0025,0.0030)
+
+
+# initialize Data Table - where to collect the Results
+data_table <- c()
+data_table_wd<- c()
+data_table_wb<- c()
+data_table_sd<- c()
+data_table_sb<- c()
+# empty list to save rescue results
+rescue_results <- data.frame(
+  s_wm = numeric(),
+  s_sm = numeric(),
+  replicate = integer(),
+  rescued = integer()
+)
+# define total runs and rescue count
+total_runs<-0
+rescue_count<-0
+# run the Simulation across all chosen parameters
+# loop over mutation rates
+for(mval_wm in m_values_wm){
+ for(mval_sm in m_values_sm){
+# loop over Selection strength
+#for(sval_wm in s_values_wm){
+  #for(sval_sm in s_values_sm){
+    # different Way of running many Simulations: make Replicates using "repeat" Function         with a counter i
+    # reset Counter
+    i<-1
+    
+    repeat {
+      # increase Counter by one
+      i<-i+1
+      # defining total runs
+      total_runs <- total_runs + 1
+      # run the Simulation once
+      one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
+                              decay_rate_wm, decay_rate_sm,
+                              s_wm=0.10, s_sm=0.20, mval_wm,m_values_sm, max_gen)
+      
+      # determine total Population Sizes
+      total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
+      
+      
+      # determine final Population Size for each Mutant
+      N_end_wd <- one_run[nrow(one_run), "wd"]
+      N_end_wb <- one_run[nrow(one_run), "wb"]
+      N_end_sd <- one_run[nrow(one_run), "sd"]
+      N_end_sb <- one_run[nrow(one_run), "sb"]
+      
+      total_end <- N_end_wd + N_end_wb + N_end_sd + N_end_sb
+      # introduce rescue count
+      rescued_wd <- ifelse(one_run[nrow(one_run), "wd"] > 0, 1, 0)
+      rescued_wb <- ifelse(one_run[nrow(one_run), "wb"] > 0, 1, 0)
+      rescued_sd <- ifelse(one_run[nrow(one_run), "sd"] > 0, 1, 0)
+      rescued_sb <- ifelse(one_run[nrow(one_run), "sb"] > 0, 1, 0)
+      
+      
+      # save rescue outcome (rescue or extinction)
+      #rescue_results <- rbind(rescue_results,
+                             # data.frame(
+                              #  s_wm = sval_wm,
+                               # s_sm = sval_sm,
+                                #replicate = i - 1,
+                                #rescued_wd = rescued_wd,
+                                #rescued_wb = rescued_wb,
+                                #rescued_sd = rescued_sd,
+                                #rescued_sb = rescued_sb
+                              #)
+      #)
+      
+      # determine Frequencies of each mutant in the final Population
+      freq_wd <- ifelse(total_end > 0, N_end_wd / total_end, 0)
+      freq_wb <- ifelse(total_end > 0, N_end_wb / total_end, 0)
+      freq_sd <- ifelse(total_end > 0, N_end_sd / total_end, 0)
+      freq_sb <- ifelse(total_end > 0, N_end_sb / total_end, 0)
+      
+      
+      
+      data_table_wd<- rbind(data_table_wd, c(mval_wm,freq_wd))
+      data_table_wb<- rbind(data_table_wb, c(mval_wm, freq_wb))
+      data_table_sd<- rbind(data_table_sd,c(mval_sm, freq_sd))
+      data_table_sb<-rbind(data_table_sb, c (mval_sm,freq_sb))
+      # enter the D into the Table
+      data_table <- rbind(data_table,c(mval_wm,mval_sm,s_wm=0.10,s_sm=0.20,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
+      # stop the repeated Computation after no_replicates times
+      
+      
+      if(i>no_replicates) break
+      
+    }
+  }
+}
+#}
+#}
+# Make sure your data is a proper data frame
+data_table_wd <- as.data.frame(data_table_wd)
+
+# If the column names are missing or wrong, set them
+colnames(data_table_wd) <- c("V1", "V2")
+
+# Add an index column for plotting along x-axis
+data_table_wd$Index <- 1:nrow(data_table_wd)
+
+# calculate rescue probability per parametercombination
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+
+
+rescue_summary <- rescue_results %>%
+  group_by(s_wm, s_sm) %>%
+  summarise(
+    rescue_prob_wd = mean(rescued_wd),
+    rescue_prob_wb = mean(rescued_wb),
+    rescue_prob_sd = mean(rescued_sd),
+    rescue_prob_sb = mean(rescued_sb),
+    .groups = "drop"
+  )
+
+print(rescue_summary)
+
+
+# Daten vorbereiten
+rescue_long <- rescue_summary %>%
+  pivot_longer(
+    cols = starts_with("rescue_prob_"),
+    names_to = "mutant",
+    values_to = "rescue_prob"
+  ) %>%
+  mutate(
+    mutant = gsub("rescue_prob_", "", mutant),
+    s_value = case_when(
+      mutant %in% c("wd", "wb") ~ s_wm,
+      mutant %in% c("sd", "sb") ~ s_sm
+    )
+  )
+
+library(ggplot2)
+
+ggplot(rescue_long, aes(x = factor(s_value), y = rescue_prob, fill = mutant)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_y_continuous(limits = c(0, 1)) +
+  scale_fill_manual(values = c(
+    "wd" = "#0072B2", 
+    "wb" = "#56B4E9", 
+    "sd" = "#E69F00", 
+    "sb" = "#D55E00"
+  )) +
+  facet_wrap(~ mutant, scales = "free_x") +
+  labs(
+    title = "Rescue Probability per Mutant vs Relevant Selection Coefficient (Boxplot)",
+    x = "Relevant selection coefficient (s)",
+    y = "Rescue Probability",
+    fill = "Mutant"
+  ) +
+  theme_minimal(base_size = 14)
+
+ggplot(rescue_long, aes(x = s_value, y = rescue_prob, color = mutant)) +
+  geom_jitter(width = 0.01, height = 0, size = 3, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  scale_y_continuous(limits = c(0, 1)) +
+  scale_color_manual(values = c(
+    "wd" = "#0072B2", 
+    "wb" = "#56B4E9", 
+    "sd" = "#E69F00", 
+    "sb" = "#D55E00"
+  )) +
+  facet_wrap(~ mutant, scales = "free_x") +
+  labs(
+    title = "Rescue Probability per Mutant vs Relevant Selection Coefficient (Scatterplot)",
+    x = "Relevant selection coefficient (s)",
+    y = "Rescue Probability",
+    color = "Mutant"
+  ) +
+  theme_minimal(base_size = 14)
+
+
+0# optional: Mutantennamen schöner machen
+rescue_long$mutant <- gsub("rescue_prob_", "", rescue_long$mutant)
+
+
+
+
+
+
+
+
+
+
+
+# plotting wd with different s values
+# making sure that its a data frame
+data_table_wd <- as.data.frame(data_table_wd)
+colnames(data_table_wd) <- c("V1", "V2")
+
+
+# Scatterplot of wd with jitter and mean 
+library(ggplot2)
+ggplot(data_table_wd, aes(x = factor(V1), y = V2, color = factor(V1))) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  labs(
+    x = "mutation rates",
+    y = "frequency",
+    color = "mutation rates",
+    title = "Weak deleterious-Means of frequencies of the different mutation rates"
+  ) +
+  theme_minimal()
+
+# plotting wb with different s values
+# making sure that its a data frame
+data_table_wb <- as.data.frame(data_table_wb)
+colnames(data_table_sb) <- c("V1", "V2")
+
+# Scatterplot of wb with jitter and mean
+ggplot(data_table_wb, aes(x = factor(V1), y = V2, color = factor(V1))) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  labs(
+    x = "mutation rate",
+    y = "frequency",
+    color = "muration rate coefficients",
+    title = "Weak beneficial-Means of frequencies of the different mutation rates"
+  ) +
+  theme_minimal()
+
+# plotting sd with different s values
+# making sure that its a data frame
+data_table_sd <- as.data.frame(data_table_sd)
+
+colnames(data_table_sd) <- c("V1", "V2")
+
+# Scatterplot of sd with jitter and mean
+ggplot(data_table_sd, aes(x = factor(V1), y = V2, color = factor(V1))) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  labs(
+    x = "mutation rates ",
+    y = "frequency",
+    color = "mutation rates",
+    title = "Strong deletrious-Means of frequencies of the different mutation rates"
+  ) +
+  theme_minimal()
+
+# plotting sb with different s values
+# making sure that its a data frame
+
+data_table_sb <- as.data.frame(data_table_sb)
+colnames(data_table_sb) <- c("V1", "V2")
+
+# Scatterplot of sb with jitter and mean 
+ggplot(data_table_sb, aes(x = factor(V1), y = V2, color = factor(V1))) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  labs(
+    x = "mutation rates",
+    y = "frequency",
+    color = "mutation rates",
+    title = "Strong beneficial-Means of frequencies of the different mutation rates"
+  ) +
+  theme_minimal()
+
+
+# mean Frequencies of each mutant
+mean_freq_wd <- mean(freq_wd)*100
+mean_freq_wb <- mean(freq_wb)*100
+mean_freq_sd <- mean(freq_sd)*100
+mean_freq_sb <- mean(freq_sb)*100
+
+print(paste("Mean frequency of wd =", mean_freq_wd) )
+print(paste("Mean frequency of wb =", mean_freq_wb) )
+print(paste("Mean frequency of sd =", mean_freq_sd) )
+print(paste("Mean frequency of sb =", mean_freq_sb) )
+
+# define Column Names of Data Table
+colnames(data_table) <- c("m_rate_wm","m_rate_sm","s_wm","s_sm","N_end_wd", "N_end_wb", "N_end_sd", "N_end_sb","freq_wd", "freq_wb", "freq_sd","freq_sb")
+# show the first and last Lines of the Output
+print(head(data_table))
+print(tail(data_table))
+
