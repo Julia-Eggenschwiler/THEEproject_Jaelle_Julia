@@ -210,30 +210,16 @@ max_gen <- 1000
 replicates <- 10
 max_gen <- 1000
 
-
+# defining Data Frame to save one Row (Population Size for multiple Generations until max_gen) after one Loop
 temp_output <- data.frame(array(NA, dim = c(0,max_gen)))
-
+# defining Data Frame to save all Results from Loop
 final_output <- data.frame(array(NA, dim = c(replicates,max_gen)))
 
-
-# Mehrfach-Simulation
-for (i in 1:replicates) {
-
-    
-  
-   temp_output <- rowSums(simulate_pop(
-    init_wd, init_wb, init_sd, init_sb,
-    decay_rate_wm, decay_rate_sm,
-    s_wm, s_sm,
-    m_rate_wm, m_rate_sm,
-    max_gen = max_gen)[, c("wd", "wb", "sd", "sb")])
-   
-   final_output[i, 1:length(temp_output)]<-temp_output
-}
-
+# defining end_gen which is as long as the last Generation where the pop size is an actual Number and not NA yet
 end_gen<-tail(which(!is.na(final_output[1,])), 1)
+# Plot one Line / one Population
 plot(x=1:end_gen,y=final_output[1,1:end_gen],type='l',ylim=c(0,max(final_output, na.rm = TRUE)),xlab =  "Generation",ylab = "Population size")
-
+# Loop for plotting each Row of Data Table / Population as a Line in the Plot
 for (i in 1:replicates) {
   
   end_gen<-tail(which(!is.na(final_output[i,])), 1)
@@ -252,9 +238,7 @@ for (i in 2:replicates) {
   
 }
 
-write.csv(final_output2, "test.csv", row.names = F)
 
-plot(temp_output$X1~temp_output$X11, type = "l") 
 ```
 ## A small analysis
 
