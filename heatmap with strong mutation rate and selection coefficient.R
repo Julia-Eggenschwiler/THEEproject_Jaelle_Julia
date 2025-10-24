@@ -1,4 +1,4 @@
-```{r}
+
 init_wd <- 300
 init_wb <- 100
 init_sd <- 300
@@ -6,7 +6,7 @@ init_sb <- 100
 m_rate_wm <- 0.01
 m_rate_sm <- 0.05
 decay_rate_wm <- 0.1
-decay_rate_sm <- 0.3
+decay_rate_sm <- 0.25
 s_wm <- 0.2
 s_sm <- 0.4
 max_gen <- 1000
@@ -48,7 +48,7 @@ for(mval_sm in m_values_sm){
       # Run your simulation
       one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
                               decay_rate_wm, decay_rate_sm,
-                              sval_sm, s_sm, mval_sm, m_rate_sm, max_gen)
+                              sval_sm, s_wm, mval_sm, m_rate_wm, max_gen)
       
       # Final population sizes for wm
       N_end_sd <- one_run[nrow(one_run), "sd"]
@@ -96,10 +96,17 @@ rescue_long <- rescue_summary %>%
 
 ggplot(rescue_summary, aes(x=factor(s_sm), y=factor(m_rate_sm), fill=rescue_prob_sd)) +
   geom_tile() +
-  scale_fill_gradientn(colors=c("blue","white","red"), name="Rescue Prob wd") +
-  labs(title="Heatmap of wd Rescue Probability",
-       x="s_wm",
-       y="m_rate_wm") +
+  scale_fill_gradientn(colors=c("blue","white","red"), name="Rescue Prob sd") +
+  labs(title="Heatmap rescue probability of strong deleterious mutation",
+       x="selection coefficients strong mutation",
+       y="mutation rates strong mutation") +
   theme_minimal()
 
-```
+
+ggplot(rescue_summary, aes(x=factor(s_sm), y=factor(m_rate_sm), fill=rescue_prob_sb)) +
+  geom_tile() +
+  scale_fill_gradientn(colors=c("blue","white","red"), name="Rescue Prob sb") +
+  labs(title="Heatmap rescue probability of strong beneficial mutation",
+       x="selection coefficients strong mutation",
+       y="mutation rates strong mutation") +
+  theme_minimal()
