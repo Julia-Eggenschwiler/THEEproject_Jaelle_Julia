@@ -1,14 +1,14 @@
 
-init_wd <- 300
-init_wb <- 100
-init_sd <- 300
-init_sb <- 100
-m_rate_wm <- 0.01
-m_rate_sm <- 0.05
+init_wd <- 100
+init_wb <- 50
+init_sd <- 100
+init_sb <- 50
+m_rate_wm <- 0.001
+m_rate_sm <- 0.005
 decay_rate_wm <- 0.2
 decay_rate_sm <- 0.4
 s_wm <- 0.2
-s_sm <- 0.4
+s_sm <- 0.3
 max_gen <- 1000
 # determine how often to run the Simulation for each set of Parameters
 no_replicates <- 100
@@ -16,12 +16,12 @@ no_replicates <- 100
 
 # set Parameters to vary
 s_values_wm <- c(0.10,0.15,0.2)
-s_values_sm <- c(0.2,0.205,0.210)
+s_values_sm <- c(0.25,0.30,0.35)
 m_values_wm <- c(0.001,0.003,0.005)
 m_values_sm <- c(0.006,0.008,0.010)
 
 
-# initialize Data Table - where to collect the Results
+# initialize Data tables
 data_table <- c()
 data_table_wd<- c()
 data_table_wb<- c()
@@ -80,6 +80,11 @@ rescue_summary <- rescue_results %>%
     rescue_prob_wb = mean(rescued_wb),
     .groups = "drop"
   )
+
+
+
+
+
 library(tidyr)
 library(ggplot2)
 
@@ -99,11 +104,38 @@ ggplot(rescue_summary, aes(x=factor(s_wm), y=factor(m_rate_wm), fill=rescue_prob
        x="s_wm", y="m_rate_wm") +
   theme_minimal()
 
+ggplot(rescue_summary, aes(x=factor(s_wm), y=factor(m_rate_wm), fill=rescue_prob_wd)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("blue", "#FFB3B3", "red"),
+    values = c(0, 0.2, 1),   # mehr Detail bei niedrigen Werten
+    limits = c(0, 0.1),
+    name = "Rescue Prob wd"
+  ) +
+  labs(
+    title = "Heatmap rescue probability of weak deleterious mutation",
+    x = "selection coefficients weak mutation",
+    y = "mutation rates weak mutation"
+  ) +
+  theme_minimal()
 ggplot(rescue_summary, aes(x=factor(s_wm), y=factor(m_rate_wm), fill=rescue_prob_wb)) +
   geom_tile() +
   scale_fill_gradientn(colors=c("blue","white","red"), name="Rescue Prob wb") +
   labs(title="Heatmap of wb Rescue Probability",
        x="s_wm", y="m_rate_wm") +
   theme_minimal()
-
+ggplot(rescue_summary, aes(x=factor(s_wm), y=factor(m_rate_wm), fill=rescue_prob_wb)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("blue", "#FFB3B3", "red"),
+    values = c(0, 0.3, 1),   # mehr Detail bei niedrigen Werten
+    limits = c(0, 0.2),
+    name = "Rescue Prob wb"
+  ) +
+  labs(
+    title = "Heatmap rescue probability of weak beneficial mutation",
+    x = "selection coefficients weak mutation",
+    y = "mutation rates weak mutation"
+  ) +
+  theme_minimal()
 
