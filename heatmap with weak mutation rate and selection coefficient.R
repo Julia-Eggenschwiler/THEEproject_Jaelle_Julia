@@ -6,7 +6,7 @@ init_sb <- 50
 m_rate_wm <- 0.001
 m_rate_sm <- 0.005
 decay_rate_wm <- 0.2
-decay_rate_sm <- 0.4
+decay_rate_sm <- 0.3
 s_wm <- 0.2
 s_sm <- 0.3
 max_gen <- 1000
