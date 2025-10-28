@@ -83,7 +83,7 @@ rescue_summary <- rescue_results %>%
     .groups = "drop"
   )
 library(tidyr)
-library(tidyr)
+library(ggplot2)
 
 rescue_long <- rescue_summary %>%
   pivot_longer(cols = starts_with("rescue_prob_"),

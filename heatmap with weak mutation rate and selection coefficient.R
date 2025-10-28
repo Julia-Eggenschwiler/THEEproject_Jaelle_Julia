@@ -73,8 +73,6 @@ for(mval_wm in m_values_wm){
 
 library(dplyr)
 
-library(dplyr)
-
 rescue_summary <- rescue_results %>%
   group_by(s_wm, m_rate_wm) %>%
   summarise(
@@ -83,7 +81,7 @@ rescue_summary <- rescue_results %>%
     .groups = "drop"
   )
 library(tidyr)
-library(tidyr)
+library(ggplot2)
 
 rescue_long <- rescue_summary %>%
   pivot_longer(cols = starts_with("rescue_prob_"),
