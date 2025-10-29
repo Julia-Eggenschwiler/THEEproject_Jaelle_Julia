@@ -1,24 +1,24 @@
-
-init_wd <- 100
+init_wd <- 50
 init_wb <- 50
-init_sd <- 100
+init_sd <- 50
 init_sb <- 50
-m_rate_wm <- 0.001
-m_rate_sm <- 0.005
-decay_rate_wm <- 0.2
-decay_rate_sm <- 0.3
+#m_rate_wm <- 0.001
+#m_rate_sm <- 0.005
+decay_rate_wm <- 0.15
+decay_rate_sm <- 0.25
 s_wm <- 0.2
 s_sm <- 0.3
 max_gen <- 1000
 # determine how often to run the Simulation for each set of Parameters
-no_replicates <- 100
+no_replicates <- 50
 
 
 # set Parameters to vary
-s_values_wm <- c(0.10,0.15,0.2)
-s_values_sm <- c(0.25,0.30,0.35)
-m_values_wm <- c(0.001,0.003,0.005)
+s_values_wm <- c(0.05,0.10,0.15)
+s_values_sm <- c(0.2,0.25,0.30)
+m_values_wm <- c(0.002,0.004,0.006)
 m_values_sm <- c(0.006,0.008,0.010)
+
 
 
 # initialize Data tables
@@ -109,12 +109,12 @@ ggplot(rescue_summary, aes(x=factor(s_wm), y=factor(m_rate_wm), fill=rescue_prob
   scale_fill_gradientn(
     colors = c("blue", "#FFB3B3", "red"),
     values = c(0, 0.2, 1),   # mehr Detail bei niedrigen Werten
-    limits = c(0, 0.1),
+    limits = c(0, 0.4),
     name = "Rescue Prob wd"
   ) +
   labs(
     title = "Heatmap rescue probability of weak deleterious mutation",
-    x = "selection coefficients weak mutation",
+    x = "weak selection coefficients",
     y = "mutation rates weak mutation"
   ) +
   theme_minimal()
@@ -129,12 +129,12 @@ ggplot(rescue_summary, aes(x=factor(s_wm), y=factor(m_rate_wm), fill=rescue_prob
   scale_fill_gradientn(
     colors = c("blue", "#FFB3B3", "red"),
     values = c(0, 0.3, 1),   # mehr Detail bei niedrigen Werten
-    limits = c(0, 0.2),
+    limits = c(0, 0.75),
     name = "Rescue Prob wb"
   ) +
   labs(
     title = "Heatmap rescue probability of weak beneficial mutation",
-    x = "selection coefficients weak mutation",
+    x = "weak selection coefficients",
     y = "mutation rates weak mutation"
   ) +
   theme_minimal()
