@@ -368,6 +368,17 @@ rescue_results <- data.frame(
   replicate = integer(),
   rescued = integer()
 )
+# Liste vorbereiten, um die Mutationswechsel für alle Replikate zu speichern
+switch_stats_all <- rbind(switch_stats_all,
+                          data.frame(
+                            s_wm = sval_wm,
+                            s_sm = sval_sm,
+                            replicate = i-1,
+                            wb_to_wd = 100 * switch_stats$wb_to_wd,
+                            wd_to_wb = 100 * switch_stats$wd_to_wb,
+                            sb_to_sd = 100 * switch_stats$sb_to_sd,
+                            sd_to_sb = 100 * switch_stats$sd_to_sb
+                          ))
 # define total runs and rescue count
 total_runs<-0
 rescue_count<-0
@@ -393,21 +404,44 @@ rescue_count<-0
                                   sval_wm, sval_sm, m_rate_wm=0.001,m_rate_sm=0.005, max_gen)
           
           # determine total Population Sizes
-          total_size <- one_run[,1]+one_run[,2]+one_run[,3]+one_run[,4]
+         pop_matrix <- one_run$population
+
+
+         total_size <- rowSums(pop_matrix)
+          
+          # Populationsextrakt
+  pop_matrix <- one_run$population
+  total_size <- rowSums(pop_matrix)
+  
+ if (!is.null(one_run$switch_stats) && nrow(one_run$switch_stats) > 0) {
+  switch_stats <- one_run$switch_stats
+  switch_stats_all <- rbind(
+    switch_stats_all,
+    data.frame(
+      s_wm = sval_wm,
+      s_sm = sval_sm,
+      replicate = i-1,
+      wb_to_wd = switch_stats$wb_to_wd,
+      wd_to_wb = switch_stats$wd_to_wb,
+      sb_to_sd = switch_stats$sb_to_sd,
+      sd_to_sb = switch_stats$sd_to_sb
+    )
+  )
+}
           
           
           # determine final Population Size for each Mutant
-          N_end_wd <- one_run[nrow(one_run), "wd"]
-          N_end_wb <- one_run[nrow(one_run), "wb"]
-          N_end_sd <- one_run[nrow(one_run), "sd"]
-          N_end_sb <- one_run[nrow(one_run), "sb"]
-          
+          N_end_wd <- pop_matrix[nrow(pop_matrix), "wd"]
+          N_end_wb <- pop_matrix[nrow(pop_matrix), "wb"]
+          N_end_sd <- pop_matrix[nrow(pop_matrix), "sd"]
+          N_end_sb <- pop_matrix[nrow(pop_matrix), "sb"]
+        
           total_end <- N_end_wd + N_end_wb + N_end_sd + N_end_sb
           # introduce rescue count
-          rescued_wd <- ifelse(one_run[nrow(one_run), "wd"] > 0, 1, 0)
-          rescued_wb <- ifelse(one_run[nrow(one_run), "wb"] > 0, 1, 0)
-          rescued_sd <- ifelse(one_run[nrow(one_run), "sd"] > 0, 1, 0)
-          rescued_sb <- ifelse(one_run[nrow(one_run), "sb"] > 0, 1, 0)
+         rescued_wd <- ifelse(N_end_wd > 0, 1, 0)
+         rescued_wb <- ifelse(N_end_wb > 0, 1, 0)
+         rescued_sd <- ifelse(N_end_sd > 0, 1, 0)
+         rescued_sb <- ifelse(N_end_sb > 0, 1, 0)
 
          
           # save rescue outcome (rescue or extinction)
@@ -436,7 +470,7 @@ rescue_count<-0
           data_table_sd<- rbind(data_table_sd,c(sval_sm, freq_sd))
           data_table_sb<-rbind(data_table_sb, c (sval_sm,freq_sb))
           # enter the D into the Table
-          data_table <- rbind(data_table,c(m_rate_wm = 0.001,m_rate_sm = 0.005,sval_wm,sval_sm,N_end_wd,        N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
+          data_table <- rbind(data_table,c(m_rate_wm = 0.001,m_rate_sm = 0.005,sval_wm,sval_sm,N_end_wd,N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
           # stop the repeated Computation after no_replicates times
           
           
@@ -447,6 +481,11 @@ rescue_count<-0
     }
   #}
 #}
+# Population über Generationen
+print(one_run$population)
+
+# Mutationswechsel in Prozent
+print(switch_stats_all)
 # Make sure your data is a proper data frame
 data_table_wd <- as.data.frame(data_table_wd)
 
