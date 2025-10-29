@@ -205,18 +205,17 @@ output <- simulate_pop(init_wd=30, init_wb=30,  init_sd=30, init_sb=30, decay_ra
 
 print(tail(output))
 
-# plot the Output 
-
-# population-Matrix extrahieren
+# extractin Population-Matrix 
 pop_matrix <- output$population
 
-# Prozentuale Häufigkeiten der Mutationswechsel
+# assign frequencies of mutation changes
 switch_stats <- output$switch_stats
 print(switch_stats)
 
-# determine x axis Range 
+# determine x Axis Range 
 x_range <- 0:(nrow(pop_matrix)-1)
 
+# plot the Output
 # this plots the total Population Size-black line visible in the plot
 plot(x_range, pop_matrix[,1] + pop_matrix[,2] + pop_matrix[,3] + pop_matrix[,4],
      type='l', ylim=c(0,max(pop_matrix)), xlab="Generation", ylab="Population size",
@@ -228,29 +227,28 @@ lines(x_range, pop_matrix[,2], col="navyblue", lwd=1.5) # wb
 lines(x_range, pop_matrix[,3], col="#D55E00", lwd=1.5) # sd
 lines(x_range, pop_matrix[,4], col="darkred", lwd=1.5) # sb
 
-# Legende
+# Legend
 legend("topleft",
        legend=c("Total","wd","wb","sd","sb"),
        col=c("black","#77b5fe","navyblue","#D55E00","darkred"),
        lty=1, lwd=1.5)
 
-# Beispiel: Ausgabe der Prozentzahlen für Mutationswechsel
-cat("\nProzentuale Häufigkeiten der Wechsel:\n")
+# output of mutation changes in per cent
 print(switch_stats)
 
-
-
-
-
-
-
-
-
-
-
-
-
 ```
+
+
+
+
+
+
+
+
+
+
+
+Plot showing the outcome (rescue or extinction) of various population
 ```{r}
 # code for plotting the result of different populations in one plot
 init_wd <- 30
@@ -282,7 +280,7 @@ for (i in 1:replicates) {
     s_wm, s_sm,
     m_rate_wm, m_rate_sm,
     max_gen = max_gen)
-   # extract Pop Matrix
+  # extract Pop Matrix
   pop_matrix <- temp_output$population
   
   # calculate Row Sums
@@ -293,17 +291,19 @@ for (i in 1:replicates) {
 
 # defining end_gen which is as long as the last Generation where the pop size is an actual Number and not NA yet
 end_gen<-tail(which(!is.na(final_output[1,])), 1)
-# Plot one Line / one Population
+# Plot first Line / first Population
 plot(x=1:max_gen,y=final_output[1,1:max_gen],type='l',ylim=c(0,max(1500, na.rm = TRUE)),xlab =  "Generation",ylab = "Population size", col = lines_colors[1])
 # Loop for plotting each Row of Data Table / Population as a Line in the Plot
 for (i in 1:replicates) {
   
   end_gen<-tail(which(!is.na(final_output[i,])), 1)
+  # each line gets assigned to a Color of lines_colors
   lines(x=1:max_gen,y=final_output[i,1:max_gen], col=lines_colors[i])
   
   
 }
 
+# same plot only that all lines of populations that go extinct, are colored grey
 # defining end_gen which is as long as the last Generation where the pop size is an actual Number and not NA yet
 end_gen<-tail(which(!is.na(final_output[1,])), 1)
 # Plot one Line / one Population
@@ -312,9 +312,10 @@ plot(x=1:max_gen,y=final_output[1,1:max_gen],type='l',ylim=c(0,max(1500, na.rm =
 for (i in 1:replicates) {
   
   end_gen<-tail(which(!is.na(final_output[i,])), 1)
-  
+  # if the length of end_gen is shorter than max_gen,then the Line will be colored grey
   if (end_gen < max_gen){
     line_col <- "grey"
+    # otherwise the line is colored randomly with another color
   } else {
     line_col <- lines_colors[i]
   }
