@@ -92,12 +92,22 @@ simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_s
   
   # with the return function, the new values for population sizes are stored
   
- return(c(N_wd_new, N_wb_new, N_sd_new, N_sb_new))
+   # Rückgabe: neue Populationsgrößen UND Mutationszahlen
+  return(list(
+    N_wd_new = N_wd_new,
+    N_wb_new = N_wb_new,
+    N_sd_new = N_sd_new,
+    N_sb_new = N_sb_new,
+    mut_wb_to_wd = mut_wb_to_wd,
+    mut_wd_to_wb = mut_wd_to_wb,
+    mut_sb_to_sd = mut_sb_to_sd,
+    mut_sd_to_sb = mut_sd_to_sb
+  ))
 }
   # with print we visualize the 4 numbers we get for the population sizes, we simulate the population by setting our parameters to certain values 
 
 
-print(simulate_one_gen(N_wd=50, N_wb=0, N_sd=50, N_sb=0, decay_rate_wm=0, decay_rate_sm=0, s_wm=0, s_sm=0, m_rate_wm=0, m_rate_sm=0))
+print(simulate_one_gen(N_wd=50, N_wb=50, N_sd=50, N_sb=50, decay_rate_wm=0, decay_rate_sm=0, s_wm=0, s_sm=0, m_rate_wm=0.005, m_rate_sm=0.005))
 ```
 
 ## Simulate a population trajectory
@@ -121,18 +131,33 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
   
   pop_new <- c(init_wd, init_wb, init_sd, init_sb)
   
+   # Neue Zähler für Mutationswechsel
+  count_wb_to_wd <- 0
+  count_wd_to_wb <- 0
+  count_sb_to_sd <- 0
+  count_sd_to_sb <- 0
+  total_mut_events <- 0
+  
   # run the Simulation until Generation max_gen
   
   for (i in 1:(max_gen + 1)) {
     
     # redefine the current Population one Generation later
     
-    pop_new <- simulate_one_gen(pop_new[1],pop_new[2],pop_new[3],pop_new[4], decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm)
+    results <- simulate_one_gen(pop_new[1],pop_new[2],pop_new[3],pop_new[4], decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm)
     
     # add the new Population Sizes to the Output Vector
-    
+    pop_new <- c(results$N_wd_new, results$N_wb_new, results$N_sd_new, results$N_sb_new)
     pop_vector <- rbind(pop_vector,pop_new)
     
+     # Mutationstracking
+    count_wb_to_wd <- count_wb_to_wd + results$mut_wb_to_wd
+    count_wd_to_wb <- count_wd_to_wb + results$mut_wd_to_wb
+    count_sb_to_sd <- count_sb_to_sd + results$mut_sb_to_sd
+    count_sd_to_sb <- count_sd_to_sb + results$mut_sd_to_sb
+    total_mut_events <- total_mut_events + results$mut_wb_to_wd + results$mut_wd_to_wb +
+      results$mut_sb_to_sd + results$mut_sd_to_sb
+      
     # Condition to stop the Simulation before max_gen: either the Population exceeds 10 Times the Original Population Size, or it goes extinct
     
     if ((sum(pop_new) >= 10 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
@@ -147,10 +172,29 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
   
   colnames(pop_vector) <- c("wd","wb", "sd", "sb")
   
-  # return the vector
+    # Prozentuale Häufigkeiten berechnen
+  if (total_mut_events > 0) {
+    freq_wb_to_wd <- 100 * count_wb_to_wd / total_mut_events
+    freq_wd_to_wb <- 100 * count_wd_to_wb / total_mut_events
+    freq_sb_to_sd <- 100 * count_sb_to_sd / total_mut_events
+    freq_sd_to_sb <- 100 * count_sd_to_sb / total_mut_events
+  } else {
+    freq_wb_to_wd <- freq_wd_to_wb <- freq_sb_to_sd <- freq_sd_to_sb <- 0
+  }
   
-  return(pop_vector)	
+  # Rückgabe wie bisher + neue Statistik
+  return(list(
+    population = pop_vector,
+    switch_stats = data.frame(
+      wb_to_wd = freq_wb_to_wd,
+      wd_to_wb = freq_wd_to_wb,
+      sb_to_sd = freq_sb_to_sd,
+      sd_to_sb = freq_sd_to_sb
+    )
+  ))
 }
+  
+
 
 
 # Test the Function and plot the Result
@@ -166,9 +210,40 @@ output <- simulate_pop(init_wd=30, init_wb=30,  init_sd=30, init_sb=30, decay_ra
 print(tail(output))
 
 # plot the Output 
+
+# population-Matrix extrahieren
+pop_matrix <- output$population
+
+# Prozentuale Häufigkeiten der Mutationswechsel
+switch_stats <- output$switch_stats
+print(switch_stats)
+
+# Plot der Populationsgrößen über die Generationen
+x_range <- 0:(nrow(pop_matrix)-1)
+
+# Gesamtpopulation
+plot(x_range, pop_matrix[,1] + pop_matrix[,2] + pop_matrix[,3] + pop_matrix[,4],
+     type='l', ylim=c(0,max(pop_matrix)), xlab="Generation", ylab="Population size",
+     col="black", lwd=1.5)
+
+# Einzelne Mutanten hinzufügen
+lines(x_range, pop_matrix[,1], col="#77b5fe", lwd=1.5) # wd
+lines(x_range, pop_matrix[,2], col="navyblue", lwd=1.5) # wb
+lines(x_range, pop_matrix[,3], col="#D55E00", lwd=1.5) # sd
+lines(x_range, pop_matrix[,4], col="darkred", lwd=1.5) # sb
+
+# Legende
+legend("topleft",
+       legend=c("Total","wd","wb","sd","sb"),
+       col=c("black","#77b5fe","navyblue","#D55E00","darkred"),
+       lty=1, lwd=1.5)
+
+# Beispiel: Ausgabe der Prozentzahlen für Mutationswechsel
+cat("\nProzentuale Häufigkeiten der Wechsel:\n")
+print(switch_stats)
 # determine x axis Range 
 
-x_range <- 0:(length(output[,1])-1)
+x_range <- 0:(length(output$population[,1])-1)
 
 # this plots the total Population Size-black line visible in the plot
 
