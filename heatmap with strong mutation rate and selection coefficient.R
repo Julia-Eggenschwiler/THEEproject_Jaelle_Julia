@@ -1,23 +1,27 @@
 
-init_wd <- 30
-init_wb <- 30
-init_sd <- 30
-init_sb <- 30
-m_rate_wm <- 0.003 # approximately 0.4
-m_rate_sm <- 0.005 # approximately 0.6
-decay_rate_wm <- 0.1
-decay_rate_sm <- 0.2
-s_wm <- 0.1
-s_sm <- 0.2
+init_wd <- 50
+init_wb <- 50
+init_sd <- 50
+init_sb <- 50
+#m_rate_wm <- 0.001
+#m_rate_sm <- 0.005
+decay_rate_wm <- 0.15
+decay_rate_sm <- 0.25
+s_wm <- 0.2
+s_sm <- 0.3
 max_gen <- 1000
-replicates<-30
+# determine how often to run the Simulation for each set of Parameters
+no_replicates <- 50
 
 
 # set Parameters to vary
-s_values_wm <- c(0.15,0.20,0.25)
-s_values_sm <- c(0.25,0.3,0.35)
-m_values_wm <- c(0.001,0.003,0.005)
+s_values_wm <- c(0.05,0.10,0.15)
+s_values_sm <- c(0.2,0.25,0.30)
+m_values_wm <- c(0.002,0.004,0.006)
 m_values_sm <- c(0.006,0.008,0.010)
+
+
+
 
 
 # initialize Data Table - where to collect the Results
@@ -97,7 +101,7 @@ ggplot(rescue_summary, aes(x=factor(s_sm), y=factor(m_rate_sm), fill=rescue_prob
   geom_tile() +
   scale_fill_gradientn(colors=c("blue","white","red"), name="Rescue Prob sd") +
   labs(title="Heatmap rescue probability of strong deleterious mutation",
-       x="selection coefficients strong mutation",
+       x="strong selection coefficients",
        y="mutation rates strong mutation") +
   theme_minimal()
 
@@ -107,22 +111,23 @@ ggplot(rescue_summary, aes(x=factor(s_sm), y=factor(m_rate_sm), fill=rescue_prob
   scale_fill_gradientn(
     colors = c("blue", "#FFB3B3", "red"),
     values = c(0, 0.3, 1),   # mehr Detail bei niedrigen Werten
-    limits = c(0, 0.4),
+    limits = c(0, 0.06),
     name = "Rescue Prob sd"
   ) +
   labs(
     title = "Heatmap rescue probability of strong deleterious mutation",
-    x = "selection coefficients strong mutation",
+    x = "strong selection-coefficients",
     y = "mutation rates strong mutation"
   ) +
   theme_minimal()
+
 
 
 ggplot(rescue_summary, aes(x=factor(s_sm), y=factor(m_rate_sm), fill=rescue_prob_sb)) +
   geom_tile() +
   scale_fill_gradientn(colors=c("blue","white","red"), name="Rescue Prob sb") +
   labs(title="Heatmap rescue probability of strong beneficial mutation",
-       x="selection coefficients strong mutation",
+       x="strong selection coefficients",
        y="mutation rates strong mutation") +
   theme_minimal()
 
@@ -132,12 +137,12 @@ ggplot(rescue_summary, aes(x=factor(s_sm), y=factor(m_rate_sm), fill=rescue_prob
   scale_fill_gradientn(
     colors = c("blue", "#FFB3B3", "red"),
     values = c(0, 0.3, 1),   # mehr Detail bei niedrigen Werten
-    limits = c(0.3, 1),
+    limits = c(0, 0.8),
     name = "Rescue Prob sb"
   ) +
   labs(
     title = "Heatmap rescue probability of strong beneficial mutation",
-    x = "selection coefficients strong mutation",
+    x = "strong selection coefficients",
     y = "mutation rates strong mutation"
   ) +
   theme_minimal()

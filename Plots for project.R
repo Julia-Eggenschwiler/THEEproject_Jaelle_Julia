@@ -41,9 +41,9 @@ for (i in 1:replicates) {
 # defining end_gen which is as long as the last Generation where the pop size is an actual Number and not NA yet
 end_gen<-tail(which(!is.na(final_output[1,])), 1)
 # Plot one Line / one Population
-plot(x=1:max_gen,y=final_output[1,1:max_gen],type='l',ylim=c(0,max(final_output, na.rm = TRUE)),xlab =  "Generation",ylab = "Population size", col = line_col[1])
+plot(x=1:max_gen,y=final_output[1,1:max_gen],type='l',ylim=c(0,max(1500, na.rm = TRUE)),xlab =  "Generation",ylab = "Population size", col = lines_colors[1])
 # Loop for plotting each Row of Data Table / Population as a Line in the Plot
-for (i in 2:replicates) {
+for (i in 1:replicates) {
   
   end_gen<-tail(which(!is.na(final_output[i,])), 1)
   
