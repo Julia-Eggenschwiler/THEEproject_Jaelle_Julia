@@ -1,10 +1,10 @@
 # code for plotting the result of different populations in one plot
-init_wd <- 50
-init_wb <- 50
-init_sd <- 50
-init_sb <- 50
-m_rate_wm <- 0.002 # approximately 0.4
-m_rate_sm <- 0.003 # approximately 0.6
+init_wd <- 30
+init_wb <- 30
+init_sd <- 30
+init_sb <- 30
+m_rate_wm <- 0.003 
+m_rate_sm <- 0.005 
 decay_rate_wm <- 0.1
 decay_rate_sm <- 0.2
 s_wm <- 0.1
@@ -41,7 +41,7 @@ for (i in 1:replicates) {
 # defining end_gen which is as long as the last Generation where the pop size is an actual Number and not NA yet
 end_gen<-tail(which(!is.na(final_output[1,])), 1)
 # Plot one Line / one Population
-plot(x=1:max_gen,y=final_output[1,1:max_gen],type='l',ylim=c(0,max(final_output, na.rm = TRUE)),xlab =  "Generation",ylab = "Population size", col = line_col[1])
+plot(x=1:max_gen,y=final_output[1,1:max_gen],type='l',ylim=c(0,max(1400, na.rm = TRUE)),xlab =  "Generation",ylab = "Population size", col = line_col[1])
 # Loop for plotting each Row of Data Table / Population as a Line in the Plot
 for (i in 2:replicates) {
   
