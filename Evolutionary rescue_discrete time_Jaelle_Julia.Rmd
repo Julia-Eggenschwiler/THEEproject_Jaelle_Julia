@@ -559,6 +559,17 @@ ggplot(rescue_long, aes(x = s_value, y = rescue_prob, color = mutant)) +
   theme_minimal(base_size = 14)
 
 
+# plotting mutation changes with different s values
+switch_long <- switch_stats_all %>%
+  pivot_longer(cols = c(wb_to_wd, wd_to_wb, sb_to_sd, sd_to_sb),
+               names_to = "switch_type",
+               values_to = "percent")
+
+ggplot(switch_long, aes(x = factor(s_wm), y = percent, fill = switch_type)) +
+  geom_boxplot() +
+  facet_wrap(~ switch_type) +
+  labs(x = "s_wm", y = "Percentage of total mutation events") +
+  theme_minimal()
 
 
 
