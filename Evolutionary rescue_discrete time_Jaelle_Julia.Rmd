@@ -92,7 +92,7 @@ simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_s
   
   # with the return function, the new values for population sizes are stored
   
-   # Rückgabe: neue Populationsgrößen UND Mutationszahlen
+   # Return new population sizes and mutation changes
   return(list(
     N_wd_new = N_wd_new,
     N_wb_new = N_wb_new,
@@ -104,7 +104,7 @@ simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_s
     mut_sd_to_sb = mut_sd_to_sb
   ))
 }
-  # with print we visualize the 4 numbers we get for the population sizes, we simulate the population by setting our parameters to certain values 
+  # with print we visualize the numbers we get for the population sizes and mutation changes, we simulate the population by setting our parameters to certain values 
 
 
 print(simulate_one_gen(N_wd=50, N_wb=50, N_sd=50, N_sb=50, decay_rate_wm=0, decay_rate_sm=0, s_wm=0, s_sm=0, m_rate_wm=0.005, m_rate_sm=0.005))
@@ -124,14 +124,12 @@ max_gen=1000
 simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm, max_gen) {
   
   # Create the Vector in which to save the Results
-  
   pop_vector <- c(init_wd,init_wb, init_sd, init_sb)
   
   # initiate the variables
-  
   pop_new <- c(init_wd, init_wb, init_sd, init_sb)
   
-   # Neue Zähler für Mutationswechsel
+   # defining counters for mutation changes
   count_wb_to_wd <- 0
   count_wd_to_wb <- 0
   count_sb_to_sd <- 0
@@ -139,18 +137,16 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
   total_mut_events <- 0
   
   # run the Simulation until Generation max_gen
-  
   for (i in 1:(max_gen + 1)) {
     
     # redefine the current Population one Generation later
-    
     results <- simulate_one_gen(pop_new[1],pop_new[2],pop_new[3],pop_new[4], decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm)
     
     # add the new Population Sizes to the Output Vector
     pop_new <- c(results$N_wd_new, results$N_wb_new, results$N_sd_new, results$N_sb_new)
     pop_vector <- rbind(pop_vector,pop_new)
     
-     # Mutationstracking
+     # count for tracking Mutations
     count_wb_to_wd <- count_wb_to_wd + results$mut_wb_to_wd
     count_wd_to_wb <- count_wd_to_wb + results$mut_wd_to_wb
     count_sb_to_sd <- count_sb_to_sd + results$mut_sb_to_sd
@@ -172,7 +168,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
   
   colnames(pop_vector) <- c("wd","wb", "sd", "sb")
   
-    # Prozentuale Häufigkeiten berechnen
+    # calculating Mutation Frequencies percent
   if (total_mut_events > 0) {
     freq_wb_to_wd <- 100 * count_wb_to_wd / total_mut_events
     freq_wd_to_wb <- 100 * count_wd_to_wb / total_mut_events
@@ -182,7 +178,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
     freq_wb_to_wd <- freq_wd_to_wb <- freq_sb_to_sd <- freq_sd_to_sb <- 0
   }
   
-  # Rückgabe wie bisher + neue Statistik
+  # Return mutation results
   return(list(
     population = pop_vector,
     switch_stats = data.frame(
@@ -218,15 +214,15 @@ pop_matrix <- output$population
 switch_stats <- output$switch_stats
 print(switch_stats)
 
-# Plot der Populationsgrößen über die Generationen
+# determine x axis Range 
 x_range <- 0:(nrow(pop_matrix)-1)
 
-# Gesamtpopulation
+# this plots the total Population Size-black line visible in the plot
 plot(x_range, pop_matrix[,1] + pop_matrix[,2] + pop_matrix[,3] + pop_matrix[,4],
      type='l', ylim=c(0,max(pop_matrix)), xlab="Generation", ylab="Population size",
      col="black", lwd=1.5)
 
-# Einzelne Mutanten hinzufügen
+# adding each mutant
 lines(x_range, pop_matrix[,1], col="#77b5fe", lwd=1.5) # wd
 lines(x_range, pop_matrix[,2], col="navyblue", lwd=1.5) # wb
 lines(x_range, pop_matrix[,3], col="#D55E00", lwd=1.5) # sd
@@ -241,30 +237,14 @@ legend("topleft",
 # Beispiel: Ausgabe der Prozentzahlen für Mutationswechsel
 cat("\nProzentuale Häufigkeiten der Wechsel:\n")
 print(switch_stats)
-# determine x axis Range 
 
-x_range <- 0:(length(output$population[,1])-1)
 
-# this plots the total Population Size-black line visible in the plot
 
-plot(x_range,output[,1]+output[,2]+output[ ,3]+output[ ,4],type='l',ylim=c(0,max(output[,1]+output[,2]+output[ ,3]+output[ ,4])),xlab =  "Generation",ylab = "Population size")
 
-# add Number of wd Individuals
-lines(x_range,output[,1], col="#77b5fe")
 
-# add Number of wb Individuals
-lines(x_range,output[,2], col="navyblue")
 
-# add Number of sd Individuals
-lines(x_range,output[,3], col="#D55E00")
 
-# add Number of sb Individuals
-lines(x_range,output[,4], col="darkred")
 
-# add Legend in the top-left corner
-legend("topleft",
-       legend=c("Weak deleterious","Weak beneficial","Strong deleterious","Strong beneficial"),
-       col=c("#77b5fe","navyblue","#D55E00","darkred"), lty=1, lwd=1.5)
 
 
 
@@ -296,13 +276,18 @@ lines_colors <- rainbow(replicates)
 
 # simulating a population multiple times
 for (i in 1:replicates) {
-  temp_output <- rowSums(simulate_pop(
+  temp_output <- simulate_pop(
     init_wd, init_wb, init_sd, init_sb,
     decay_rate_wm, decay_rate_sm,
     s_wm, s_sm,
     m_rate_wm, m_rate_sm,
-    max_gen = max_gen)[, c("wd", "wb", "sd", "sb")])
+    max_gen = max_gen)
+   # extract Pop Matrix
+  pop_matrix <- temp_output$population
   
+  # calculate Row Sums
+  temp_output <- rowSums(pop_matrix[, c("wd", "wb", "sd", "sb")])
+  # adding to Result Table
   final_output[i, 1:length(temp_output)]<-temp_output
 }
 
@@ -368,17 +353,18 @@ rescue_results <- data.frame(
   replicate = integer(),
   rescued = integer()
 )
-# Liste vorbereiten, um die Mutationswechsel für alle Replikate zu speichern
-switch_stats_all <- rbind(switch_stats_all,
-                          data.frame(
-                            s_wm = sval_wm,
-                            s_sm = sval_sm,
-                            replicate = i-1,
-                            wb_to_wd = 100 * switch_stats$wb_to_wd,
-                            wd_to_wb = 100 * switch_stats$wd_to_wb,
-                            sb_to_sd = 100 * switch_stats$sb_to_sd,
-                            sd_to_sb = 100 * switch_stats$sd_to_sb
-                          ))
+
+# preparing list to save mutation changes (in per cent) for all replicates - only if they exist
+switch_stats_all <- data.frame(
+  s_wm = numeric(),
+  s_sm = numeric(),
+  replicate = integer(),
+  wb_to_wd = numeric(),
+  wd_to_wb = numeric(),
+  sb_to_sd = numeric(),
+  sd_to_sb = numeric()
+)
+
 # define total runs and rescue count
 total_runs<-0
 rescue_count<-0
@@ -412,7 +398,7 @@ rescue_count<-0
           # Populationsextrakt
   pop_matrix <- one_run$population
   total_size <- rowSums(pop_matrix)
-  
+# saving mutation changes  
  if (!is.null(one_run$switch_stats) && nrow(one_run$switch_stats) > 0) {
   switch_stats <- one_run$switch_stats
   switch_stats_all <- rbind(
@@ -469,7 +455,7 @@ rescue_count<-0
           data_table_wb<- rbind(data_table_wb, c(sval_wm, freq_wb))
           data_table_sd<- rbind(data_table_sd,c(sval_sm, freq_sd))
           data_table_sb<-rbind(data_table_sb, c (sval_sm,freq_sb))
-          # enter the D into the Table
+          # enter the Data into the Table
           data_table <- rbind(data_table,c(m_rate_wm = 0.001,m_rate_sm = 0.005,sval_wm,sval_sm,N_end_wd,N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
           # stop the repeated Computation after no_replicates times
           
@@ -481,12 +467,15 @@ rescue_count<-0
     }
   #}
 #}
-# Population über Generationen
-print(one_run$population)
 
-# Mutationswechsel in Prozent
+# Population over generations
+print(one_run$population)
+# Mutation changes in percent
 print(switch_stats_all)
-# Make sure your data is a proper data frame
+
+
+
+# Make sure data is a proper data frame
 data_table_wd <- as.data.frame(data_table_wd)
 
 # If the column names are missing or wrong, set them
@@ -495,7 +484,7 @@ colnames(data_table_wd) <- c("V1", "V2")
 # Add an index column for plotting along x-axis
 data_table_wd$Index <- 1:nrow(data_table_wd)
 
-# calculate rescue probability per parametercombination
+# calculate rescue probability per parameter combination
 library(dplyr)
 library(ggplot2)
 library(tidyr)
@@ -515,7 +504,7 @@ rescue_summary <- rescue_results %>%
 print(rescue_summary)
 
 
-# Daten vorbereiten
+# Prepare rescue data
 rescue_long <- rescue_summary %>%
   pivot_longer(
     cols = starts_with("rescue_prob_"),
@@ -570,8 +559,6 @@ ggplot(rescue_long, aes(x = s_value, y = rescue_prob, color = mutant)) +
   theme_minimal(base_size = 14)
 
 
-0# optional: Mutantennamen schöner machen
-rescue_long$mutant <- gsub("rescue_prob_", "", rescue_long$mutant)
 
 
 

@@ -134,6 +134,46 @@ for (i in 2:replicates) {
   lines(final_output2[,i]~final_output2$X11, col="red",na.rm=TRUE)
   
 }
+output <- simulate_pop(init_wd=30, init_wb=30,  init_sd=30, init_sb=30, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.003, m_rate_sm=0.005,max_gen)
+
+# show the last few Lines of the Data Table
+
+print(tail(output))
+
+# plot the Output 
+
+# population-Matrix extrahieren
+pop_matrix <- output$population
+
+# Prozentuale Häufigkeiten der Mutationswechsel
+switch_stats <- output$switch_stats
+print(switch_stats)
+
+# Plot der Populationsgrößen über die Generationen
+x_range <- 0:(nrow(pop_matrix)-1)
+
+# Gesamtpopulation
+plot(x_range, pop_matrix[,1] + pop_matrix[,2] + pop_matrix[,3] + pop_matrix[,4],
+     type='l', ylim=c(0,max(pop_matrix)), xlab="Generation", ylab="Population size",
+     col="black", lwd=1.5)
+
+# Einzelne Mutanten hinzufügen
+lines(x_range, pop_matrix[,1], col="#77b5fe", lwd=1.5) # wd
+lines(x_range, pop_matrix[,2], col="navyblue", lwd=1.5) # wb
+lines(x_range, pop_matrix[,3], col="#D55E00", lwd=1.5) # sd
+lines(x_range, pop_matrix[,4], col="darkred", lwd=1.5) # sb
+
+# Legende
+legend("topleft",
+       legend=c("Total","wd","wb","sd","sb"),
+       col=c("black","#77b5fe","navyblue","#D55E00","darkred"),
+       lty=1, lwd=1.5)
+
+# Beispiel: Ausgabe der Prozentzahlen für Mutationswechsel
+cat("\nProzentuale Häufigkeiten der Wechsel:\n")
+print(switch_stats)
+
+
 # Plotting one population
 output <- simulate_pop(init_wd=50, init_wb=50,  init_sd=50, init_sb=50, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.002, m_rate_sm=0.003,max_gen)
 
