@@ -341,12 +341,12 @@ init_wd <- 30
 init_wb <- 30
 init_sd <- 30
 init_sb <- 30
-m_rate_wm <- 0.001
-m_rate_sm <- 0.005
+m_rate_wm <- 0.01
+m_rate_sm <- 0.01
 decay_rate_wm <- 0.1
 decay_rate_sm <- 0.2
 s_wm <- 0.2
-s_sm <- 0.3
+s_sm <- 0.4
 max_gen <- 1000
 # determine how often to run the Simulation for each set of Parameters
 no_replicates <- 50
@@ -384,6 +384,10 @@ switch_stats_all <- data.frame(
   sd_to_sb = numeric()
 )
 
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
 # define total runs and rescue count
 total_runs<-0
 rescue_count<-0
@@ -406,7 +410,7 @@ rescue_count<-0
           # run the Simulation once
           one_run <- simulate_pop(init_wd, init_wb, init_sd, init_sb,
                                   decay_rate_wm, decay_rate_sm,
-                                  sval_wm, sval_sm, m_rate_wm=0.001,m_rate_sm=0.005, max_gen)
+                                  sval_wm, sval_sm, m_rate_wm,m_rate_sm, max_gen)
           
           # determine total Population Sizes
          pop_matrix <- one_run$population
@@ -516,9 +520,6 @@ ggplot(switch_long, aes(x = factor(s_wm), y = percent, fill = switch_type)) +
   theme_minimal()
 
 # calculate rescue probability per parameter combination
-library(dplyr)
-library(ggplot2)
-library(tidyr)
 
 
 
