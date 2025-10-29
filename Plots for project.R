@@ -20,15 +20,21 @@ final_output <- data.frame(array(NA, dim = c(replicates,max_gen)))
 # defining a Set of colors in order to color each Line differently
 lines_colors <- rainbow(replicates)
 
+
 # simulating a population multiple times
 for (i in 1:replicates) {
-  temp_output <- rowSums(simulate_pop(
+  temp_output <- simulate_pop(
     init_wd, init_wb, init_sd, init_sb,
     decay_rate_wm, decay_rate_sm,
     s_wm, s_sm,
     m_rate_wm, m_rate_sm,
-    max_gen = max_gen)[, c("wd", "wb", "sd", "sb")])
+    max_gen = max_gen)
+  # extract Pop Matrix
+  pop_matrix <- temp_output$population
   
+  # calculate Row Sums
+  temp_output <- rowSums(pop_matrix[, c("wd", "wb", "sd", "sb")])
+  # adding to Result Table
   final_output[i, 1:length(temp_output)]<-temp_output
 }
 
@@ -53,10 +59,10 @@ for (i in 2:replicates) {
 
 
 # code for plotting the result of different populations in one plot
-init_wd <- 50
-init_wb <- 50
-init_sd <- 50
-init_sb <- 50
+init_wd <- 30
+init_wb <- 30
+init_sd <- 30
+init_sb <- 30
 m_rate_wm <- 0.002 # approximately 0.4
 m_rate_sm <- 0.003 # approximately 0.6
 decay_rate_wm <- 0.1
@@ -76,13 +82,18 @@ lines_colors <- rainbow(replicates)
 
 # simulating a population multiple times
 for (i in 1:replicates) {
-  temp_output <- rowSums(simulate_pop(
+  temp_output <- simulate_pop(
     init_wd, init_wb, init_sd, init_sb,
     decay_rate_wm, decay_rate_sm,
     s_wm, s_sm,
     m_rate_wm, m_rate_sm,
-    max_gen = max_gen)[, c("wd", "wb", "sd", "sb")])
+    max_gen = max_gen)
+  # extract Pop Matrix
+  pop_matrix <- temp_output$population
   
+  # calculate Row Sums
+  temp_output <- rowSums(pop_matrix[, c("wd", "wb", "sd", "sb")])
+  # adding to Result Table
   final_output[i, 1:length(temp_output)]<-temp_output
 }
 
@@ -98,6 +109,7 @@ for (i in 2:replicates) {
   
   
 }
+
 #init_wd <- 50 => stochastic but sometimes one population survives
 #init_wb <- 50
 #init_sd <- 50
