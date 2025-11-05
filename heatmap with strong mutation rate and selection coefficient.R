@@ -146,3 +146,4 @@ ggplot(rescue_summary, aes(x=factor(s_sm), y=factor(m_rate_sm), fill=rescue_prob
     y = "mutation rates strong mutation"
   ) +
   theme_minimal()
+
