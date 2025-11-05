@@ -809,7 +809,11 @@ ggplot(rescue_summary, aes(x = factor(s_sm), y = factor(m_rate_sm), fill = rescu
     x = "Strong selection coefficients",
     y = "Mutation rates (strong mutation)"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+    plot.margin = margin(t = 20, r = 10, b = 10, l = 10)
+  )
 
 # --- Heatmap: strong beneficial mutation ---
 ggplot(rescue_summary, aes(x = factor(s_sm), y = factor(m_rate_sm), fill = rescue_prob_sb)) +
@@ -825,8 +829,11 @@ ggplot(rescue_summary, aes(x = factor(s_sm), y = factor(m_rate_sm), fill = rescu
     x = "Strong selection coefficients",
     y = "Mutation rates (strong mutation)"
   ) +
-  theme_minimal()
-
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+    plot.margin = margin(t = 20, r = 10, b = 10, l = 10)
+  )
 
 
 
@@ -914,7 +921,11 @@ ggplot(rescue_summary, aes(x = factor(s_wm), y = factor(m_rate_wm), fill = rescu
     x = "Weak selection coefficients",
     y = "Mutation rates (weak mutation)"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+    plot.margin = margin(t = 20, r = 10, b = 10, l = 10)
+  )
 
 # --- Heatmap: weak beneficial mutation ---
 ggplot(rescue_summary, aes(x = factor(s_wm), y = factor(m_rate_wm), fill = rescue_prob_wb)) +
