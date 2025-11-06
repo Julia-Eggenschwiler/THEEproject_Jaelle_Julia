@@ -1,7 +1,7 @@
 ---
 title: "Basic model of evolutionary rescue in discrete time"
 author: "Jaelle Häfliger and Julia Eggenschwiler"
-date: "2025-10-30"
+date: "2025-11-06"
 output:
   html_document:
     df_print: paged
