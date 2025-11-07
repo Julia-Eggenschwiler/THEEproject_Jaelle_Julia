@@ -1,5 +1,5 @@
 ---
-title: "Basic model of evolutionary rescue in discrete time"
+title: "A computational model for antibiotic resistance"
 author: "Jaelle Häfliger and Julia Eggenschwiler"
 date: "2025-11-06"
 output:
@@ -107,7 +107,7 @@ simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_s
   # with print we visualize the numbers we get for the population sizes and mutation changes, we simulate the population by setting our parameters to certain values 
 
 
-print(simulate_one_gen(N_wd=50, N_wb=50, N_sd=50, N_sb=50, decay_rate_wm=0, decay_rate_sm=0, s_wm=0, s_sm=0, m_rate_wm=0.005, m_rate_sm=0.005))
+print(simulate_one_gen(N_wd=50, N_wb=50, N_sd=50, N_sb=50, decay_rate_wm=0.2, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.002, m_rate_sm=0.003))
 ```
 
 ## Simulate a population trajectory
@@ -129,7 +129,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
   # initiate the variables
   pop_new <- c(init_wd, init_wb, init_sd, init_sb)
   
-   # defining counters for mutation changes
+  # defining counters for mutation changes
   count_wb_to_wd <- 0
   count_wd_to_wb <- 0
   count_sb_to_sd <- 0
@@ -205,7 +205,7 @@ output <- simulate_pop(init_wd=30, init_wb=30,  init_sd=30, init_sb=30, decay_ra
 
 print(tail(output))
 
-# extractin Population-Matrix 
+# extracting Population-Matrix 
 pop_matrix <- output$population
 
 # assign frequencies of mutation changes
@@ -255,8 +255,8 @@ init_wd <- 30
 init_wb <- 30
 init_sd <- 30
 init_sb <- 30
-m_rate_wm <- 0.002 
-m_rate_sm <- 0.003
+m_rate_wm <- 0.003 
+m_rate_sm <- 0.005
 decay_rate_wm <- 0.1
 decay_rate_sm <- 0.2
 s_wm <- 0.1
@@ -355,6 +355,7 @@ no_replicates <- 50
 # set Parameters to vary
 s_values_wm <- c(0.10,0.15,0.2)
 s_values_sm <- c(0.25,0.30,0.35)
+#Commented to vary always only one variable
 #m_values_wm <- c(0.001,0.01,0.05)
 #m_values_sm <- c(0.05,0.1,0.15)
 
@@ -418,8 +419,9 @@ rescue_count<-0
 
          total_size <- rowSums(pop_matrix)
           
-          # Populationsextrakt
+  # defining popuation matrix
   pop_matrix <- one_run$population
+  # calculating total size (1 row is equal to total pop size, meaning adding up all columns)
   total_size <- rowSums(pop_matrix)
 # saving mutation changes  
  if (!is.null(one_run$switch_stats) && nrow(one_run$switch_stats) > 0) {
@@ -479,7 +481,7 @@ rescue_count<-0
           data_table_sd<- rbind(data_table_sd,c(sval_sm, freq_sd))
           data_table_sb<-rbind(data_table_sb, c (sval_sm,freq_sb))
           # enter the Data into the Table
-          data_table <- rbind(data_table,c(m_rate_wm = 0.001,m_rate_sm = 0.005,sval_wm,sval_sm,N_end_wd,N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the                varying parameters (mutation rate and selection strength for each version of weak            and strong mutation) to the table too
+          data_table <- rbind(data_table,c(m_rate_wm = 0.001,m_rate_sm = 0.005,sval_wm,sval_sm,N_end_wd,N_end_wb, N_end_sd, N_end_sb,freq_wd, freq_wb, freq_sd,freq_sb)) # note that we add the varying Parameters (Mutation Rate and Selection Strength for each Version of weak and strong Mutation) to the Table too
           # stop the repeated Computation after no_replicates times
           
           
@@ -504,10 +506,10 @@ data_table_wd <- as.data.frame(data_table_wd)
 # If the column names are missing or wrong, set them
 colnames(data_table_wd) <- c("V1", "V2")
 
-# Add an index column for plotting along x-axis
+# Add an Index Column for plotting along x-axis
 data_table_wd$Index <- 1:nrow(data_table_wd)
 
-# plotting mutation changes with different s values
+# plotting Mutation Changes with different s values
 switch_long <- switch_stats_all %>%
   pivot_longer(cols = c(wb_to_wd, wd_to_wb, sb_to_sd, sd_to_sb),
                names_to = "switch_type",
@@ -519,9 +521,7 @@ ggplot(switch_long, aes(x = factor(s_wm), y = percent, fill = switch_type)) +
   labs(x = "s_wm", y = "Percentage of total mutation events") +
   theme_minimal()
 
-# calculate rescue probability per parameter combination
-
-
+# calculate Rescue Probability per Parameter Combination
 
 rescue_summary <- rescue_results %>%
   group_by(s_wm, s_sm) %>%
@@ -551,6 +551,7 @@ rescue_long <- rescue_summary %>%
     )
   )
 
+# Plotting Rescue Probability with different s values
 library(ggplot2)
 
 ggplot(rescue_long, aes(x = factor(s_value), y = rescue_prob, fill = mutant)) +
@@ -659,7 +660,6 @@ ggplot(data_table_sd, aes(x = factor(V1), y = V2, color = factor(V1))) +
 
 # plotting sb with different s values
   # making sure that its a data frame
-
 data_table_sb <- as.data.frame(data_table_sb)
 colnames(data_table_sb) <- c("V1", "V2")
 
