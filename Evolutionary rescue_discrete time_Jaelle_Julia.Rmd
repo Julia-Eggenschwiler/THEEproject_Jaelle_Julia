@@ -104,7 +104,7 @@ simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_s
   # with print we visualize the numbers we get for the population sizes and mutation changes, we simulate the population by setting our parameters to certain values 
 
 
-print(simulate_one_gen(N_wd=50, N_wb=0, N_sd=50, N_sb=0, decay_rate_wm=0.025, decay_rate_sm=0.05, s_wm=0.1, s_sm=0.2, m_rate_wm=0.05, m_rate_sm=0.07))
+print(simulate_one_gen(N_wd=30, N_wb=0, N_sd=30, N_sb=0, decay_rate_wm=0.045, decay_rate_sm=0.09, s_wm=0.1, s_sm=0.2, m_rate_wm=0.05, m_rate_sm=0.07))
 ```
 
 ## Simulate a population trajectory
@@ -196,7 +196,7 @@ max_gen <- 100
 
 # Simulation Data with certain values determined
 
-output <- simulate_pop(init_wd=50, init_wb=0,  init_sd=50, init_sb=0, decay_rate_wm=0.06, decay_rate_sm=0.12, s_wm=0.1, s_sm=0.2, m_rate_wm=0.05, m_rate_sm=0.07,max_gen)
+output <- simulate_pop(init_wd=30, init_wb=0,  init_sd=30, init_sb=0, decay_rate_wm=0.025, decay_rate_sm=0.05, s_wm=0.1, s_sm=0.2, m_rate_wm=0.05, m_rate_sm=0.07,max_gen)
 
 # show the last few Lines of the Data Table
 
@@ -248,14 +248,14 @@ print(switch_stats)
 Plot showing the outcome (rescue or extinction) of various population
 ```{r}
 # code for plotting the result of different populations in one plot
-init_wd <- 50
+init_wd <- 30
 init_wb <- 0
-init_sd <- 50
+init_sd <- 30
 init_sb <- 0
 m_rate_wm <- 0.05 
 m_rate_sm <- 0.07
-decay_rate_wm <- 0.025
-decay_rate_sm <- 0.05
+decay_rate_wm <- 0.045
+decay_rate_sm <- 0.09
 s_wm <- 0.1
 s_sm <- 0.2
 max_gen <- 1000
@@ -334,14 +334,14 @@ As you can see if you simulate and plot the output several times, there is a lot
 ```{r}
 # set some Parameters to fixed Values
 
-init_wd <- 50
+init_wd <- 30
 init_wb <- 0
-init_sd <- 50
+init_sd <- 30
 init_sb <- 0
 m_rate_wm <- 0.05
 m_rate_sm <- 0.07
-decay_rate_wm <- 0.025
-decay_rate_sm <- 0.05
+decay_rate_wm <- 0.045
+decay_rate_sm <- 0.09
 s_wm <- 0.1
 s_sm <- 0.2
 max_gen <- 1000
@@ -695,13 +695,13 @@ print(tail(data_table))
 ```{r}
 
 #initial parameters set to certain values 
-init_wd <- 50
+init_wd <- 30
 init_wb <- 0
-init_sd <- 50
+init_sd <- 30
 init_sb <- 0
 
-decay_rate_wm <- 0.025
-decay_rate_sm <- 0.05
+decay_rate_wm <- 0.045
+decay_rate_sm <- 0.09
 s_wm <- 0.1
 s_sm <- 0.2
 
@@ -852,8 +852,13 @@ for (rep in 1:no_replicates) {
     data.frame(outcome = outcome)
   )
 }
+competition_results$outcome <- factor(
+  competition_results$outcome,
+  levels = c("Weak wins", "Strong wins", "Total extinction")
+)
+
 ggplot(competition_results, aes(x = outcome)) +
-  geom_bar(fill = "steelblue") +
+  geom_bar(fill = "darkred") +
   labs(title = "Competition Outcomes",
        y = "Count", x = "")
 
