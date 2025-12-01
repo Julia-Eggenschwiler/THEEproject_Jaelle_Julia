@@ -28,6 +28,7 @@ The powerpoint presentation: "THEE_project_Jaelle_Julia.pptx" contains the slide
 The word-document: "Report THEE - draft_Julia Eggenschwiler_Jaelle Häfliger", contains the final version of our project-report, all results and outcomes and the interpretation and discussion of the results.
 
 The subfolder: "r-files with separate plots" contains four additional R-files and two word-documents, with separate plots and notes, which were mainly used during the coding-stage of the project. These are not necesary to execute the code and visualize the results of this project.
+The second subfolder: "history_data" contains the ".RData" and ".Rhistory" files of this project.
 
 
 # Contact
