@@ -45,7 +45,7 @@ In this notebook, we are implementing simulations of evolutionary rescue with 4 
 
 -   **max_gen:** number of generations after which to stop the simulation (should be an integer \>0; this is not a model parameter but a setting for the simulations). In the code presented here, the simulation stops automatically if the population goes extinct, or if it recovers and exceeds 10 times the original total population size, so **max_gen** can be set to a large value without creating extremely long simulation times.
 
-## Our Question
+## Our research-question:
 How do 2 bacterial strains, which can alternate between beneficial and deleterious versions of the same strength via mutation and back-mutation, influence the probability of rescue and how does their frequency in the population change?
 
 ## Definitions
