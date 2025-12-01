@@ -1,7 +1,7 @@
 
 ## A computational model for antibiotic resistance - An evolutionary rescue model developed by Julia Eggenschwiler and Jaelle Häfliger
 
-This project was created by **Jaelle Häfliger and Julia Eggenschwiler**  in the Theoretical Ecology and Evolution research practical of fall 2025.
+This project was created by **Jaelle Häfliger and Julia Eggenschwiler**  in the Theoretical Ecology and Evolution research practical of autumn 2025.
 
 The live website for 2025 is at [(https://github.com/Julia-Eggenschwiler/THEEproject_Jaelle_Julia)]
  
@@ -24,7 +24,7 @@ In order to "knit" (print) the R-markdown to a .html file, it is required to ins
 
 In the github-repository: "THEEproject_Jaelle_Julia" you can find our R Markdown file: "Evolutionary rescue_discrete time_Jaelle_Julia.Rmd". This file contains all our annotated code which is needed to execute our simulations. 
 Furthermore, there is the knitted hmtl-file: "Evolutionary-rescue_discrete-time_Jaelle_Julia.html", which is an already knitted version of our code.
-The powerpoint presentation: "THEE_project.pptx" contains the slides of our the project-presentation, which was held at the THEE-lab on the 30th of October 2025.
+The powerpoint presentation: "THEE_project_Jaelle_Julia.pptx" contains the slides of our the project-presentation, which was held at the THEE-lab on the 30th of October 2025.
 The word-document: "Report THEE - draft_Julia Eggenschwiler_Jaelle Häfliger", contains the final version of our project-report, all results and outcomes and the interpretation and discussion of the results.
 
 The subfolder: "r-files with separate plots" contains four additional R-files and two word-documents, with separate plots and notes, which were mainly used during the coding-stage of the project. These are not necesary to execute the code and visualize the results of this project.
