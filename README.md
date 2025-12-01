@@ -5,37 +5,34 @@ This project was created by **Jaelle Häfliger and Julia Eggenschwiler**  in the
 
 The live website for 2025 is at [(https://github.com/Julia-Eggenschwiler/THEEproject_Jaelle_Julia)]
  
+# Project description and main results
 
-Learning objectives:
+This readme-file connects to the Evolutionary rescue project, which was done during the Theoretical Reserach Practical course in autumn 2025. This project addresses the following research question: 
+How do 2 bacterial strains, which can alternate between beneficial and deleterious versions of the same strength via mutation and back-mutation, influence the probability of rescue and how does their frequency in the population change?
 
-1. show reproducibility principles in action,
-2. introduce students to the format & conventions of a GitHub repository.
- 
-# Introduction
+In order to answer this question the trade-off between having a smaller disadvantage in the beginning but only being able to mutate to having a smaller advantage and starting with a larger disadvantage in the beginning but being able to mutate to having a larger advantage is a key componant.
 
-A readme file is the first thing a collaborator will encounter when you share your project with them. Its purpose is to orient them to your project: brief but detailed!
-
-Structure it from wide to narrow: Start with the title and a short description of the project's motivation/purpose. If you have main results, you can list them here. Then explain how the project can be installed (e.g., any required dependencies like R or RStudio (versions?), any required packages). Next describe how the files are structured in the repository (which files run the code?, where can collaborators find the data?, etc.). Finally, you can let users know who they can contact in case they need help with your project.
-
-# Purpose
-
-Teaching students in the THEE research practical how to use GitHub by giving them an example repository that they can download and run on their computer.
+The most important result found during the analysing-process of the simulation is the following: The model tends to be quite stochastic, but different plots and calculations show: in most cases, the strong bacterial strain achieves a higher rescue-probability and therefore "wins" compared to the weak bacterial strain.
 
 # How to install
 
-You will need R and RStudio. Any newer version should work (I used R 4.3.3 and RStudio 2023.12.1).
+To create and run the simulation we used RStudio version 4.4.1. To run the code, it is required that the R-packages “dplyr”, “ggplot2”, “tidyr” and installed and loaded.  
 
-If you want to "print" the R notebook file to a .pdf or .html file (this is called "knitting" the notebook file), you will need to install the knitr package (version 1.49 or better). You can use the command: `install.packages("knitr")`
+In order to "knit" (print) the R-markdown to a .html file, it is required to install the knitr package with the function `install.packages("knitr")`
 
 # File structure
 
-In the main folder you can find the code for the exercises and their solutions in the file "reproducibility.Rmd" (with a knitted .html version as well). The file reproducibility.Rmd produces .csv files whose names will be in the format "numbers_1_to_10--multiplier \d .csv", 3 example csv files are shown.
+In the github-repository: "THEEproject_Jaelle_Julia" you can find our R Markdown file: "Evolutionary rescue_discrete time_Jaelle_Julia.Rmd". This file contains all our annotated code which is needed to execute our simulations. 
+Furthermore, there is the knitted hmtl-file: "Evolutionary-rescue_discrete-time_Jaelle_Julia.html", which is an already knitted version of our code.
+The powerpoint presentation: "THEE_project.pptx" contains the slides of our the project-presentation, which was held at the THEE-lab on the 3oth of October 2025.
+The word-document: "Report THEE - draft_Julia Eggenschwiler_Jaelle Häfliger", contains the final version of our project-report, all results and outcomes and the interpretation and discussion of the results.
 
-There is 1 subfolder called "archived--2024". It contains course material from 2024: 2 pdf's of lecture slides and a subfolder with the code.
+The subfolder: "r-files with separate plots" contains four additional R-files and two word-documents, with separate plots and notes, which were mainly used during the coding-stage of the project. These are not necesary to execute the code and visualize the results of this project.
+
 
 # Contact
 
-This repository and its contents were developed and are maintained by Dr. Ana-Hermina Ghenu for Prof. Claudia Bank, Institute of Ecology & Evolution, University of Bern.
-If you have any questions or need any help regarding the project, please contact Hermina via their GitHub account (EvoNerd).
+This repository and its contents were developed and are maintained by Jaelle Häfliger and Julia Eggenschwiler druing the Research Practical in Theoretical Ecology and Evolution, led by Prof. Claudia Bank, Institute of Ecology & Evolution, University of Bern.
+If you have any questions or need any help regarding the project, please contact Julia Eggenschwiler or Jaelle Häfliger via their corresponding email-addresses of the University of Bern (julia.eggenschwiler@students.unibe.ch, jaelle.haefliger@students.unibe.ch).
 
 *Note: check out the **website branch** if you are looking for the code to build and deploy the website.*
