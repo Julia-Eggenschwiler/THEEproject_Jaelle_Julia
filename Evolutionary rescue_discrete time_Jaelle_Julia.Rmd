@@ -104,7 +104,7 @@ simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_s
   # with print we visualize the numbers we get for the population sizes and mutation changes, we simulate the population by setting our parameters to certain values 
 
 
-print(simulate_one_gen(N_wd=50, N_wb=50, N_sd=50, N_sb=50, decay_rate_wm=0.2, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.002, m_rate_sm=0.003))
+print(simulate_one_gen(N_wd=30, N_wb=0, N_sd=30, N_sb=0, decay_rate_wm=0.05, decay_rate_sm=0.1, s_wm=0.1, s_sm=0.2, m_rate_wm=0.05, m_rate_sm=0.07))
 ```
 
 ## Simulate a population trajectory
@@ -153,7 +153,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
       
     # Condition to stop the Simulation before max_gen: either the Population exceeds 10 Times the Original Population Size, or it goes extinct
     
-    if ((sum(pop_new) >= 10 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
+    if ((sum(pop_new) >= 100 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
       break
 
 }
@@ -192,11 +192,11 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
 
 # Test the Function and plot the Result
 
-max_gen <- 100
+max_gen <- 1000
 
 # Simulation Data with certain values determined
 
-output <- simulate_pop(init_wd=30, init_wb=30,  init_sd=30, init_sb=30, decay_rate_wm=0.1, decay_rate_sm=0.2, s_wm=0.1, s_sm=0.2, m_rate_wm=0.003, m_rate_sm=0.005,max_gen)
+output <- simulate_pop(init_wd=30, init_wb=0,  init_sd=30, init_sb=0, decay_rate_wm=0.05, decay_rate_sm=0.1, s_wm=0.1, s_sm=0.2, m_rate_wm=0.05, m_rate_sm=0.07,max_gen)
 
 # show the last few Lines of the Data Table
 
@@ -215,7 +215,7 @@ x_range <- 0:(nrow(pop_matrix)-1)
 # plot the Output
 # this plots the total Population Size-black line visible in the plot
 plot(x_range, pop_matrix[,1] + pop_matrix[,2] + pop_matrix[,3] + pop_matrix[,4],
-     type='l', ylim=c(0,max(pop_matrix)), xlab="Generation", ylab="Population size",
+     type='l', xlim =c(0,max(1000, na.rm = TRUE)),ylim=c(0,max(500, na.rm = TRUE)), xlab="Generation", ylab="Population size",
      col="black", lwd=1.5)
 
 # adding each mutant
@@ -248,14 +248,14 @@ print(switch_stats)
 Plot showing the outcome (rescue or extinction) of various population
 ```{r}
 # code for plotting the result of different populations in one plot
-init_wd <- 30
-init_wb <- 30
-init_sd <- 30
-init_sb <- 30
-m_rate_wm <- 0.003 
-m_rate_sm <- 0.005
-decay_rate_wm <- 0.1
-decay_rate_sm <- 0.2
+init_wd <- 50
+init_wb <- 0
+init_sd <- 50
+init_sb <- 0
+m_rate_wm <- 0.05 
+m_rate_sm <- 0.075
+decay_rate_wm <- 0.06
+decay_rate_sm <- 0.12
 s_wm <- 0.1
 s_sm <- 0.2
 max_gen <- 1000
@@ -334,16 +334,16 @@ As you can see if you simulate and plot the output several times, there is a lot
 ```{r}
 # set some Parameters to fixed Values
 
-init_wd <- 30
-init_wb <- 30
-init_sd <- 30
-init_sb <- 30
-m_rate_wm <- 0.01
-m_rate_sm <- 0.01
-decay_rate_wm <- 0.1
-decay_rate_sm <- 0.2
-s_wm <- 0.05
-s_sm <- 0.1
+init_wd <- 60
+init_wb <- 0
+init_sd <- 60
+init_sb <- 0
+m_rate_wm <- 0.05
+m_rate_sm <- 0.07
+decay_rate_wm <- 0.05
+decay_rate_sm <- 0.1
+s_wm <- 0.1
+s_sm <- 0.2
 max_gen <- 1000
 # determine how often to run the Simulation for each set of Parameters
 no_replicates <- 50
