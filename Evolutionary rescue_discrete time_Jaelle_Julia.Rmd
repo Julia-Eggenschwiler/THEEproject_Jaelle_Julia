@@ -1,7 +1,7 @@
 ---
 title: "A computational model for antibiotic resistance"
 author: "Jaelle Häfliger and Julia Eggenschwiler"
-date: "2025-11-06"
+date: "2025-12-01"
 output:
   html_document:
     df_print: paged
@@ -11,7 +11,7 @@ output:
 
 ## Simulating evolutionary rescue in discrete time
 
-In this notebook, we are implementing simulations of evolutionary rescue with 4 different mutations of different strengths in discrete time, as discussed and analyzed in the work by Orr & Unckless. The model is as follows: a haploid population starts with a given number of weak deleterious mutants, weak beneficial mutants, strong deleterious mutants and strong beneficial mutants. We define the two weak mutants as the weak strain and the two strong mutants as strong strain. The model allows for mutation within one strain from deleterious to beneficial mutants, but also from beneficial to deleterious mutants (back-mutation). We want to determine the trade-off of either starting only as weak deleterious and mutating to only weak beneficial or starting strong deleterious but being able to mutate to strong beneficial. To this scenario the back-mutation acts as an additional source of complexity. Each mutant is  considered rescued if the population-size of the mutant stays bigger than 0 after max_gen (100 generations). 
+In this notebook, we are implementing simulations of evolutionary rescue with 4 different mutations of different strengths in discrete time, as discussed and analyzed in the work by Orr & Unckless. The model is as follows: a haploid population starts with a given number of weak deleterious mutants and strong deleterious mutants.  The model allows for mutation within one strain from deleterious to beneficial mutants, but also from beneficial to deleterious mutants (back-mutation). Of course in the first generation, only mutation from deleterious to beneficial is possible, since we start with 0 beneficial mutants of either strength.We define the two weak mutants as the weak strain and the two strong mutants as strong strain. We want to determine the trade-off of either starting only as weak deleterious and mutating to only weak beneficial or starting strong deleterious but being able to mutate to strong beneficial. To this scenario the back-mutation acts as an additional source of complexity. Each strain is  considered rescued if the population-size of the stain stays bigger than 0 after max_gen (1000 generations). 
 
 ## List of variables and parameters
 
@@ -25,7 +25,7 @@ In this notebook, we are implementing simulations of evolutionary rescue with 4 
 
 -   **init_wd:** initial population size of population with the weak deleterious mutation (should be a positive integer)
 
--   **init_wb:** initial population size of the population with the weak beneficial mutation (should be a non-negative
+-   **init_wb:** initial population size of the population with the weak beneficial mutation (should be a non-negative integer)
 
 -   **init_sd:** initial population size of the population with the strong deleterious mutation (should be a positive integer)
 
@@ -45,10 +45,8 @@ In this notebook, we are implementing simulations of evolutionary rescue with 4 
 
 -   **max_gen:** number of generations after which to stop the simulation (should be an integer \>0; this is not a model parameter but a setting for the simulations). In the code presented here, the simulation stops automatically if the population goes extinct, or if it recovers and exceeds 10 times the original total population size, so **max_gen** can be set to a large value without creating extremely long simulation times.
 
-## Our Question
-
-How do 2 deleterious mutations of different strength , which can mutate to beneficial ones, influence the probability of rescue and how does their frequency in the population change?
-How do 2 mutations, which can alternate between beneficial and deleterious versions of the same strength, influence the probability of rescue and how does their frequency in the population change?
+## Our research-question:
+How do 2 bacterial strains, which can alternate between beneficial and deleterious versions of the same strength via mutation and back-mutation, influence the probability of rescue and how does their frequency in the population change?
 
 ## Definitions
 
@@ -64,7 +62,7 @@ simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_s
   
   # draw Offspring according to Poisson Distribution
   # altered so all four different mutations are considered 
-  # for deleterious mutations the s is calculated minus (negative effect) and for the beneficial muation the s is added (positive effect)
+  # for deleterious mutations the s is calculated minus (negative effect) and for the beneficial mutation the s is added (positive effect)
   
   offsp_wd <- rpois(1, N_wd * (1-decay_rate_wm-s_wm))
   offsp_wb <- rpois(1, N_wb * (1-decay_rate_wm+s_wm))
@@ -109,10 +107,10 @@ print(simulate_one_gen(N_wd=30, N_wb=0, N_sd=30, N_sb=0, decay_rate_wm=0.05, dec
 
 ## Simulate a population trajectory
 
-We can now track the dynamics of the population from one generation to another, but this is not enough. We want to follow the population from time 0 until it either is rescued or goes extinct. This is what the following function does.
+We can now track the dynamics of the population from one generation to another. We want to see the dynamics of the population until a maximum of 1000 generations, to see whether they can persist and if they get extinct, how long they could persist. Additionally, this trajectory gives a visualization of the dynmics of the four mutations in our model over time.
 
 ```{r}
-# Simulation runs until the 100th Generation
+# Simulation runs until the 1000th Generation
 
 max_gen=1000
 
@@ -153,7 +151,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
       
     # Condition to stop the Simulation before max_gen: either the Population exceeds 10 Times the Original Population Size, or it goes extinct
     
-    if ((sum(pop_new) >= 100 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
+    if ((sum(pop_new) >= 10 * sum(c(init_wd, init_wb, init_sd, init_sb))) || sum(pop_new) == 0)
       break
 
 }
@@ -192,7 +190,7 @@ simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, dec
 
 # Test the Function and plot the Result
 
-max_gen <- 1000
+max_gen <- 100
 
 # Simulation Data with certain values determined
 
@@ -215,7 +213,7 @@ x_range <- 0:(nrow(pop_matrix)-1)
 # plot the Output
 # this plots the total Population Size-black line visible in the plot
 plot(x_range, pop_matrix[,1] + pop_matrix[,2] + pop_matrix[,3] + pop_matrix[,4],
-     type='l', xlim =c(0,max(1000, na.rm = TRUE)),ylim=c(0,max(500, na.rm = TRUE)), xlab="Generation", ylab="Population size",
+     type='l', ylim=c(0,max(pop_matrix)), xlab="Generation", ylab="Population size",
      col="black", lwd=1.5)
 
 # adding each mutant
@@ -245,17 +243,17 @@ print(switch_stats)
 
 
 
-Plot showing the outcome (rescue or extinction) of various population
+Plot, which shows the outcome of our simulations over maximum 1000 generations. But the whole population (all four mutants together) is visualized, to see what the overall dynamics of our simulations are. Furthermore, this plots are helpful because our model tends to be strongly stochastic. So this part can easily be re-run to get a better understanding of this behaviour.
 ```{r}
 # code for plotting the result of different populations in one plot
-init_wd <- 50
+init_wd <- 30
 init_wb <- 0
-init_sd <- 50
+init_sd <- 30
 init_sb <- 0
 m_rate_wm <- 0.05 
-m_rate_sm <- 0.075
-decay_rate_wm <- 0.06
-decay_rate_sm <- 0.12
+m_rate_sm <- 0.07
+decay_rate_wm <- 0.05
+decay_rate_sm <- 0.1
 s_wm <- 0.1
 s_sm <- 0.2
 max_gen <- 1000
@@ -299,44 +297,18 @@ for (i in 1:replicates) {
   
   
 }
-
-# same plot only that all lines of populations that go extinct, are colored grey
-# defining end_gen which is as long as the last Generation where the pop size is an actual Number and not NA yet
-end_gen<-tail(which(!is.na(final_output[1,])), 1)
-# Plot one Line / one Population
-plot(x=1:max_gen,y=final_output[1,1:max_gen],type='l',ylim=c(0,max(1500, na.rm = TRUE)),xlab =  "Generation",ylab = "Population size", col = lines_colors[1])
-# Loop for plotting each Row of Data Table / Population as a Line in the Plot
-for (i in 1:replicates) {
-  
-  end_gen<-tail(which(!is.na(final_output[i,])), 1)
-  # if the length of end_gen is shorter than max_gen,then the Line will be colored grey
-  if (end_gen < max_gen){
-    line_col <- "grey"
-    # otherwise the line is colored randomly with another color
-  } else {
-    line_col <- lines_colors[i]
-  }
-  lines(x=1:max_gen,y=final_output[i,1:max_gen], col=line_col)
-  
-  
-}
-
 ```
-## A small analysis
+## Mutant frequencies and rescue probability per mutant
 
-As you can see if you simulate and plot the output several times, there is a lot of stochasticity/variation in the outcome. Therefore, to get interpretable results, we have to run the simulation many times and summarize the outcome depending on the question of our study. Here I am showing an example in which we record the time and the value of the lowest population size (or the time of extinction, if the population size eventually goes to 0). Usually, we want to study this for a range of model parameters; here I am varying the decay rate and the selection coefficient. Other (maybe more interesting) features to study would be the following: =\>simulating varying parameters with replicates per one value
-
--   rescue probability dependent on initial frequency and selection coefficient
--   time at which the rescue mutation occurs first if it rescues, vs. if it doesn't rescue, dependent on initial population size and mutation rate
--   time until the population has recovered in case it becomes rescued, dependent on mutation rate and selection coefficient
--   ...
+In this piece of code, we calculate the rescue probability of each mutant separately and visualize this using different plots.
+Furthermore, we calculate the frequency of each mutant (wd, wb, sd, sb) after 1000 generations. The purpose of these plots is mainly to show the effect of each mutation on a population and how the frequencies differ, which helps provide an overview and hopefully provides better understanding of the quite complex dynamics.
 
 ```{r}
 # set some Parameters to fixed Values
 
-init_wd <- 60
+init_wd <- 30
 init_wb <- 0
-init_sd <- 60
+init_sd <- 30
 init_sb <- 0
 m_rate_wm <- 0.05
 m_rate_sm <- 0.07
@@ -569,37 +541,6 @@ ggplot(rescue_long, aes(x = factor(s_value), y = rescue_prob, fill = mutant)) +
   ) +
   theme_minimal(base_size = 14)
 
-ggplot(rescue_long, aes(x = s_value, y = rescue_prob, color = mutant)) +
-  geom_jitter(width = 0.01, height = 0, size = 3, alpha = 0.7) +
-  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
-  scale_y_continuous(limits = c(0, 1)) +
-  scale_color_manual(values = c(
-    "wd" = "#77b5fe", 
-    "wb" = "navyblue", 
-    "sd" = "#D55E00", 
-    "sb" = "darkred"
-  )) +
-  facet_wrap(~ mutant, scales = "free_x") +
-  labs(
-    title = "Rescue Probability per Mutant vs Relevant Selection Coefficient (Scatterplot)",
-    x = "Relevant selection coefficient (s)",
-    y = "Rescue Probability",
-    color = "Mutant"
-  ) +
-  theme_minimal(base_size = 14)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # plotting wd with different s values
   # making sure that its a data frame
@@ -691,19 +632,23 @@ print(head(data_table))
 print(tail(data_table))
 ```
 
+Comparison of the overall rescue-probablity of the weak and strong bacterial strain to determine whether the trade-off pays off after 1000 generations.
 
+This last piece of code, calculates the rescue-probability of the strong and the weak bacterial strain, with the according s_values and m_values. This result is then visualzed with one heatmap for each strain.
+
+Furthermore, a barplot is used to show in how many cases the weak or strong bacterial strain "wins" and in how many cases total extinction occurs.
 ```{r}
 
-#initial parameters set to certain values 
-init_wd <- 50
-init_wb <- 50
-init_sd <- 50
-init_sb <- 50
-
-decay_rate_wm <- 0.15
-decay_rate_sm <- 0.25
-s_wm <- 0.2
-s_sm <- 0.3
+#initial population-sizes of the deleterious mutations set to 30 
+init_wd <- 30
+init_wb <- 0
+init_sd <- 30
+init_sb <- 0
+#decay-rates set to fixed values
+decay_rate_wm <- 0.05
+decay_rate_sm <- 0.1
+s_wm <- 0.1
+s_sm <- 0.2
 
 max_gen <- 1000
 no_replicates <- 50
@@ -711,226 +656,193 @@ no_replicates <- 50
 #selection coefficients s and mutation rates m, varied (3 different values for both the weak and the strong strain)
 s_values_wm <- c(0.10, 0.15, 0.20)
 s_values_sm <- c(0.25, 0.30, 0.35)
-m_values_wm <- c(0.004, 0.005, 0.006)
-m_values_sm <- c(0.007, 0.008, 0.009)
+m_values_wm <- c(4e-5, 5e-4, 6e-3)
+m_values_sm <- c(7e-5, 8e-4, 9e-3)
 
-#prepare empty data-tables to store results (one for each of the four mutations)
-data_table <- c()
-data_table_wd <- c()
-data_table_wb <- c()
-data_table_sd <- c()
-data_table_sb <- c()
+
 
 #----strong mutation----
 
-#set up data frame to store the rescue results for the strong mutation, include selection coefficients and mutation rates of the strong mutation which should be stored as numeric values and the number of rescues for the strong beneficial and strong deleterious mutations (as whole numbers)
-rescue_results <- data.frame(
+#in this part we set up a data frame to store the rescue results for the strong mutation, which then includes the selection coefficients and mutation rates of the strong mutation, stored as numeric values and the number of rescues for the strong beneficial and strong deleterious mutations 
+
+rescue_results_strong <- data.frame(
   s_sm = numeric(),
-  m_rate_sm = numeric(),
+  m_sm = numeric(),
   replicate = integer(),
-  rescued_sd = integer(),
-  rescued_sb = integer()
+  rescued_strong = integer()
 )
 
-
-
-# creating for loops to vary through the three different values for the strong selection coefficients and the strong mutation rates and the number of replicates we need
-for (mval_sm in m_values_sm) {
-  for (sval_sm in s_values_sm) {
+#in a next step the m_values and s_values are varied (for both 3 different values as explained above), which is done for 50 replicates
+for (mval in m_values_sm) {
+  for (sval in s_values_sm) {
     for (rep in 1:no_replicates) {
       
-      # runing the simulation once (using the simulate_pop()function from before)
       one_run <- simulate_pop(
         init_wd, init_wb, init_sd, init_sb,
         decay_rate_wm, decay_rate_sm,
-        sval_sm, s_wm, mval_sm, m_rate_wm, max_gen
+        s_wm, sval, m_rate_wm, mval, max_gen
       )
       
-      # from the one_run, getting the final population-sizes of the strong deleterious and strong beneficial mutation
       pop <- one_run$population
-      N_end_sd <- tail(pop[, "sd"], 1)
-      N_end_sb <- tail(pop[, "sb"], 1)
+      N_sd = tail(pop[, "sd"], 1)
+      N_sb = tail(pop[, "sb"], 1)
       
-      # saving the number of rescues, defined as the final population-size of the mutation being bigger than 0
-      rescued_sd <- as.integer(N_end_sd > 0)
-      rescued_sb <- as.integer(N_end_sb > 0)
+    #the strong strain is considered "alive" in our model, if the combined population-size of the strong beneficial and strong deleterious mutation is still bigger than 0
       
-      # using the function r bind to combine all results into the data frame rescue_results which we set up before
-      rescue_results <- rbind(
-        rescue_results,
+      strong_alive = as.integer((N_sd + N_sb) > 0)
+      
+  # in rescue_results_strong the paramters, selection coefficients and mutation rates are listed together with whether the population was rescued (1) or went extinct (0), this overview provides the results for each of the 50 replicates separate
+      
+      rescue_results_strong <- rbind(
+        rescue_results_strong,
         data.frame(
-          s_sm = sval_sm,
-          m_rate_sm = mval_sm,
+          s_sm = sval,
+          m_sm = mval,
           replicate = rep,
-          rescued_sd = rescued_sd,
-          rescued_sb = rescued_sb
+          rescued_strong = strong_alive
         )
       )
     }
   }
 }
 
-# creating a summary of the rescue results that we get of the strong mutations by taking the mean of the number of rescues over the replicates
-library(dplyr)
-rescue_summary <- rescue_results %>%
-  group_by(s_sm, m_rate_sm) %>%
-  summarise(
-    rescue_prob_sd = mean(rescued_sd),
-    rescue_prob_sb = mean(rescued_sb),
-    .groups = "drop"
-  )
+# in rescue_summary_strong the rescue-results are summarized, so that the probability is calculated for every combination of the mutation rates with the selection coefficients (equals to 3x3)
 
-#loading the needed packages "tidyr" and "ggplot2"
-library(tidyr)
-library(ggplot2)
+rescue_summary_strong <- rescue_results_strong %>%
+  group_by(s_sm, m_sm) %>%
+  summarise(rescue_prob_strong = mean(rescued_strong), .groups = "drop")
 
+#----weak mutation----
 
+#in this part we set up a data frame to store the rescue results for the weak mutation, which then includes the selection coefficients and mutation rates of the weak mutation, stored as numeric values and the number of rescues for the weak beneficial and weak deleterious mutations 
 
-# plotting the heatmaps for the strong mutations, using s-values for the x-axis, mutation rates for the y axis and the colouring indicating rescue-probabiltiy
-ggplot(rescue_summary, aes(x = factor(s_sm), y = factor(m_rate_sm), fill = rescue_prob_sd)) +
-  geom_tile() +
-  scale_fill_gradientn(
-    colors = c("blue", "#FFB3B3", "red"),
-    values = c(0, 0.3, 1),
-    limits = c(0, 1),
-    name = "Rescue Prob sd"
-  ) +
-  labs(
-    title = "Heatmap: Rescue Probability of Strong Deleterious Mutation",
-    x = "Strong selection coefficients",
-    y = "Mutation rates (strong mutation)"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-    plot.margin = margin(t = 20, r = 10, b = 10, l = 10)
-  )
-
-
-ggplot(rescue_summary, aes(x = factor(s_sm), y = factor(m_rate_sm), fill = rescue_prob_sb)) +
-  geom_tile() +
-  scale_fill_gradientn(
-    colors = c("blue", "#FFB3B3", "red"),
-    values = c(0, 0.3, 1),
-    limits = c(0, 1),
-    name = "Rescue Prob sb"
-  ) +
-  labs(
-    title = "Heatmap: Rescue Probability of Strong Beneficial Mutation",
-    x = "Strong selection coefficients",
-    y = "Mutation rates (strong mutation)"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-    plot.margin = margin(t = 20, r = 10, b = 10, l = 10)
-  )
-#set up data frame to store the rescue results for the weak mutation, include selection coefficients and mutation rates of the weak mutation which should be stored as numeric values and the number of rescues for the weak beneficial and strong deleterious mutations (as whole numbers)
-
-
-rescue_results <- data.frame(
+rescue_results_weak <- data.frame(
   s_wm = numeric(),
-  m_rate_wm = numeric(),
+  m_wm = numeric(),
   replicate = integer(),
-  rescued_wd = integer(),
-  rescued_wb = integer()
+  rescued_weak = integer()
 )
 
+#in a next step the m_values and s_values are varied (for both 3 different values as explained above), which is done for 50 replicates
 
-#creating for loops to vary through the three different values for the weak selection coefficients and the weak mutation rates and the number of replicates we need
-for (mval_wm in m_values_wm) {
-  for (sval_wm in s_values_wm) {
+for (mval in m_values_wm) {
+  for (sval in s_values_wm) {
     for (rep in 1:no_replicates) {
       
-      #runing the simulation once (using the simulate_pop()function from before)
       one_run <- simulate_pop(
         init_wd, init_wb, init_sd, init_sb,
         decay_rate_wm, decay_rate_sm,
-        sval_wm, s_sm, mval_wm, m_rate_sm, max_gen
+        sval, s_sm, mval, m_rate_sm, max_gen
       )
       
-      # from the one_run, getting the final population-sizes of the weak deleterious and strong beneficial mutation
       pop <- one_run$population
-      N_end_wd <- tail(pop[, "wd"], 1)
-      N_end_wb <- tail(pop[, "wb"], 1)
+      N_wd = tail(pop[, "wd"], 1)
+      N_wb = tail(pop[, "wb"], 1)
       
-      #  saving the number of rescues, defined as the final population-size of the mutation being bigger than 0
-      rescued_wd <- as.integer(N_end_wd > 0)
-      rescued_wb <- as.integer(N_end_wb > 0)
       
-      # using the function r bind to combine all results into the data frame rescue_results which we set up before
-      rescue_results <- rbind(
-        rescue_results,
+   #the weak strain is considered "alive" in our model, if the combined population-size of the weak beneficial and weak deleterious mutation is still bigger than 0
+      
+      weak_alive = as.integer((N_wd + N_wb) > 0)
+      
+    # in rescue_results_weak the parameters, selection coefficients and mutation rates are listed together with whether the population was rescued (1) or went extinct (0), this overview provides the results for each of the 50 replicates separately
+      
+      rescue_results_weak <- rbind(
+        rescue_results_weak,
         data.frame(
-          s_wm = sval_wm,
-          m_rate_wm = mval_wm,
+          s_wm = sval,
+          m_wm = mval,
           replicate = rep,
-          rescued_wd = rescued_wd,
-          rescued_wb = rescued_wb
+          rescued_weak = weak_alive
         )
       )
     }
   }
 }
 
-# creating a summary of the rescue results that we get of the weak mutations by taking the mean of the number of rescues over the replicates
-library(dplyr)
-library(dplyr)
-rescue_summary <- rescue_results %>%
-  group_by(s_wm, m_rate_wm) %>%
-  summarise(
-    rescue_prob_wd = mean(rescued_wd),
-    rescue_prob_wb = mean(rescued_wb),
-    .groups = "drop"
+# in rescue_summary_weak the rescue-results are summarized, so that the probability is calculated for every combination of the mutation rates with the selection coefficients (equals to 3x3)
+
+rescue_summary_weak <- rescue_results_weak %>%
+  group_by(s_wm, m_wm) %>%
+  summarise(rescue_prob_weak = mean(rescued_weak), .groups = "drop")
+
+# with the function ggplot, we this section produces the heatmaps for both the weak and strong bacterial strain separately, blue colour indicating 0 rescue probability, red indicating the highest rescue probability (in our case up to approximately 0.20)
+
+ggplot(rescue_summary_strong,
+       aes(x = factor(s_sm), y = factor(m_sm), fill = rescue_prob_strong)) +
+  geom_tile(color = "white") +  
+  scale_fill_gradient(low = "blue", high = "red", limits = c(0, 0.2), oob = scales::squish) +
+  labs(title = "Rescue Probability — Strong Strain",
+       x = "Strong selection coefficient",
+       y = "Strong mutation rate",
+       fill = "Rescue Prob.") +
+  theme_minimal()
+
+
+ggplot(rescue_summary_weak,
+       aes(x = factor(s_wm), y = factor(m_wm), fill = rescue_prob_weak)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "blue", high = "red", limits = c(0, 0.2), oob = scales::squish) +
+  labs(title = "Rescue Probability — Weak Strain",
+       x = "Weak selection coefficient",
+       y = "Weak mutation rate",
+       fill = "Rescue Prob.") +
+  theme_minimal()
+
+# in this part, we want to compare how many times the strong strain "wins", how many times the weak strain "wins" and how often we get total extinction
+
+#we create an empty data frame to store the results
+
+competition_results <- data.frame(outcome = character())
+
+#for each replicate it is determined 
+for (rep in 1:no_replicates) {
+  
+  one_run <- simulate_pop(
+    init_wd, init_wb, init_sd, init_sb,
+    decay_rate_wm, decay_rate_sm,
+    s_wm, s_sm, m_rate_wm, m_rate_sm, max_gen
   )
+  
+  pop <- one_run$population
 
-# loading needed packages "tidyr" and "ggplot2"
-library(tidyr)
-library(ggplot2)
+#for both strains, with tail, the last value is taken and if the value is bigger than 0 the strain is considered alive, indicated with weak_alive and strong_alive 
+  
+  weak_alive   <- (tail(pop[, "wd"], 1) + tail(pop[, "wb"], 1)) > 0
+  strong_alive <- (tail(pop[, "sd"], 1) + tail(pop[, "sb"], 1)) > 0
 
+# with outcome, we asign the different cases to discriptions, if only weak is alive-->"weak wins", if only strong is alive--> "strong wins", if both are >0-->"both survive", if both go to extinction-->"total extinction"
+  
+ outcome <-
+  if (weak_alive & !strong_alive) {
+    "Weak wins"
+  } else if (strong_alive & !weak_alive) {
+    "Strong wins"
+  } else if (strong_alive & weak_alive) {
+    "Both survive"
+  } else {
+    "Total extinction"
+  }
 
-
-# plotting the heatmaps for the weak mutations, using s-values for the x-axis, mutation rates for the y axis and the colouring indicating rescue-probabiltiy
-ggplot(rescue_summary, aes(x = factor(s_wm), y = factor(m_rate_wm), fill = rescue_prob_wd)) +
-  geom_tile() +
-  scale_fill_gradientn(
-    colors = c("blue", "#FFB3B3", "red"),
-    values = c(0, 0.2, 1),
-    limits = c(0, 1),
-    name = "Rescue Prob wd"
-  ) +
-  labs(
-    title = "Heatmap: Rescue Probability of Weak Deleterious Mutation",
-    x = "Weak selection coefficients",
-    y = "Mutation rates (weak mutation)"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-    plot.margin = margin(t = 20, r = 10, b = 10, l = 10)
+  
+  competition_results <- rbind(
+    competition_results,
+    data.frame(outcome = outcome)
   )
+}
+competition_results$outcome <- factor(
+  competition_results$outcome,
+  levels = c("Weak wins", "Strong wins", "Total extinction", "Both survive")
+)
 
+# with ggplot, we create a barplot, which gives us the counts of the four different outcomes
 
-ggplot(rescue_summary, aes(x = factor(s_wm), y = factor(m_rate_wm), fill = rescue_prob_wb)) +
-  geom_tile() +
-  scale_fill_gradientn(
-    colors = c("blue", "#FFB3B3", "red"),
-    values = c(0, 0.3, 1),
-    limits = c(0, 1),
-    name = "Rescue Prob wb"
-  ) +
-  labs(
-    title = "Heatmap: Rescue Probability of Weak Beneficial Mutation",
-    x = "Weak selection coefficients",
-    y = "Mutation rates (weak mutation)"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-    plot.margin = margin(t = 20, r = 10, b = 10, l = 10)              
-  )
+ggplot(competition_results, aes(x = outcome)) +
+  geom_bar(fill = "darkred") +
+  labs(title = "Competition Outcomes",
+       y = "Count", x = "")
 
 
 
 
 ```
+
