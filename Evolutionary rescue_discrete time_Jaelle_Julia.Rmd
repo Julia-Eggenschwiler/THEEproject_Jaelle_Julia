@@ -298,26 +298,6 @@ for (i in 1:replicates) {
   
 }
 
-# same plot only that all lines of populations that go extinct, are colored grey
-# defining end_gen which is as long as the last Generation where the pop size is an actual Number and not NA yet
-end_gen<-tail(which(!is.na(final_output[1,])), 1)
-# Plot one Line / one Population
-plot(x=1:max_gen,y=final_output[1,1:max_gen],type='l',ylim=c(0,max(1500, na.rm = TRUE)),xlab =  "Generation",ylab = "Population size", col = lines_colors[1])
-# Loop for plotting each Row of Data Table / Population as a Line in the Plot
-for (i in 1:replicates) {
-  
-  end_gen<-tail(which(!is.na(final_output[i,])), 1)
-  # if the length of end_gen is shorter than max_gen,then the Line will be colored grey
-  if (end_gen < max_gen){
-    line_col <- "grey"
-    # otherwise the line is colored randomly with another color
-  } else {
-    line_col <- lines_colors[i]
-  }
-  lines(x=1:max_gen,y=final_output[i,1:max_gen], col=line_col)
-  
-  
-}
 
 ```
 ## Mutant frequencies and rescue probability per mutant
