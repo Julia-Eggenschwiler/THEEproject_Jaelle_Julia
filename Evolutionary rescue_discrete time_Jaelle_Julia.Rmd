@@ -297,8 +297,6 @@ for (i in 1:replicates) {
   
   
 }
-
-
 ```
 ## Mutant frequencies and rescue probability per mutant
 
