@@ -56,8 +56,8 @@ How do 2 bacterial strains, which can alternate between beneficial and deleterio
 -   sb: strong beneficial
 
 ```{r}
-# Function for simulating one Generation in the Population
-# adding the population sizes, decay rates, seleection coefficients and mutation rates
+# Function for simulating one generation in the Population
+# adding the population sizes, decay rates, selection coefficients and mutation rates
 simulate_one_gen <- function(N_wd, N_wb, N_sd, N_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm) {
   
   # draw Offspring according to Poisson Distribution
@@ -114,7 +114,7 @@ We can now track the dynamics of the population from one generation to another. 
 
 max_gen=1000
 
-#With this function we simulate over generations, we put initial population sizes of the four mutations, with the parameter max_gen we determine that our simulation maximally runs until the 100th geneeration
+#With this function we simulate over generations, we put initial population sizes of the four mutations, with the parameter max_gen we determine that our simulation maximally runs until the 1000th generation
 
 simulate_pop <- function(init_wd, init_wb,  init_sd, init_sb, decay_rate_wm, decay_rate_sm, s_wm, s_sm, m_rate_wm, m_rate_sm, max_gen) {
   
