@@ -29,6 +29,7 @@ The word-document: "Report THEE - draft_Julia Eggenschwiler_Jaelle Häfliger", c
 
 The subfolder: "r-files with separate plots" contains four additional R-files and two word-documents, with separate plots and notes, which were mainly used during the coding-stage of the project. These are not necesary to execute the code and visualize the results of this project.
 The second subfolder: "history_data" contains the ".RData" and ".Rhistory" files of this project.
+Finally the github-repository contains this readme-file: "README.md".
 
 
 # Contact
