@@ -302,7 +302,7 @@ for (i in 1:replicates) {
 ```
 ## Mutant frequencies and rescue probability per mutant
 
-In this piece of code, we calculate the rescue probability of each mutant separatly and visualize this using different plots.
+In this piece of code, we calculate the rescue probability of each mutant separately and visualize this using different plots.
 Furthermore, we calculate the frequency of each mutant (wd, wb, sd, sb) after 1000 generations. The purpose of these plots is mainly to show the effect of each mutation on a population and how the frequencies differ, which helps provide an overview and hopefully provides better understanding of the quite complex dynamics.
 
 ```{r}
