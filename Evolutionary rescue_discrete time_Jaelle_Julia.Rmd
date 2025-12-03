@@ -468,7 +468,11 @@ rescue_count<-0
 # Population over generations
 print(one_run$population)
 # Mutation changes in percent
-print(switch_stats_all)
+
+#important note!: 
+#switch_stats_all was really helpful to us to observe the mutation dynamcis of the whole population and of the two strains and we think it really helps to understand our model better. However, we put the command: "print(switch_stats_all)" into comments, because it would take up too much space in the html-document.
+
+#print(switch_stats_all)
 
 
 
